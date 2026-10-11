@@ -30,8 +30,12 @@ final class AudioLevelMonitor: ObservableObject {
 
     private let captureSession = AVCaptureSession()
     private let audioOutput = AVCaptureAudioDataOutput()
+    private let sessionQueue = DispatchQueue(
+        label: "com.lightrecorder.audiomonitor.session",
+        qos: .userInitiated
+    )
     private let sampleQueue = DispatchQueue(
-        label: "com.lightrecorder.audiomonitor",
+        label: "com.lightrecorder.audiomonitor.samples",
         qos: .userInteractive
     )
 
@@ -46,12 +50,22 @@ final class AudioLevelMonitor: ObservableObject {
         category: "AudioLevelMonitor"
     )
 
-    // MARK: - Initialization
+    // MARK: - Initialization & Deinitialization
 
     init() {
         delegate.onLevels = { [weak self] rawRMS, rawPeak in
             Task { @MainActor [weak self] in
                 self?.processIncomingLevels(rms: rawRMS, peak: rawPeak)
+            }
+        }
+    }
+
+    deinit {
+        displayTimer?.invalidate()
+        let session = captureSession
+        sessionQueue.async {
+            if session.isRunning {
+                session.stopRunning()
             }
         }
     }
@@ -98,11 +112,19 @@ final class AudioLevelMonitor: ObservableObject {
         level = 0.0
         peak = 0.0
 
-        sampleQueue.async { [weak self] in
+        sessionQueue.async { [weak self] in
             guard let self else { return }
             if self.captureSession.isRunning {
                 self.captureSession.stopRunning()
             }
+            self.captureSession.beginConfiguration()
+            for input in self.captureSession.inputs {
+                self.captureSession.removeInput(input)
+            }
+            for output in self.captureSession.outputs {
+                self.captureSession.removeOutput(output)
+            }
+            self.captureSession.commitConfiguration()
             self.logger.info("Audio level monitor stopped")
         }
     }
@@ -120,11 +142,16 @@ final class AudioLevelMonitor: ObservableObject {
     private func startCaptureSession(deviceID: String?) {
         isMonitoring = true
 
-        sampleQueue.async { [weak self] in
+        sessionQueue.async { [weak self] in
             guard let self else { return }
 
             self.captureSession.beginConfiguration()
-            defer { self.captureSession.commitConfiguration() }
+            var committed = false
+            defer {
+                if !committed {
+                    self.captureSession.commitConfiguration()
+                }
+            }
 
             // Clean previous inputs & outputs
             for input in self.captureSession.inputs {
@@ -143,21 +170,37 @@ final class AudioLevelMonitor: ObservableObject {
 
             guard let device else {
                 self.logger.warning("No microphone device available to monitor")
+                self.captureSession.commitConfiguration()
+                committed = true
                 return
             }
 
             do {
                 let input = try AVCaptureDeviceInput(device: device)
-                if self.captureSession.canAddInput(input) {
-                    self.captureSession.addInput(input)
+                guard self.captureSession.canAddInput(input) else {
+                    self.logger.warning("Cannot add audio input to monitor session")
+                    self.captureSession.commitConfiguration()
+                    committed = true
+                    return
                 }
+                self.captureSession.addInput(input)
 
                 self.audioOutput.setSampleBufferDelegate(self.delegate, queue: self.sampleQueue)
-                if self.captureSession.canAddOutput(self.audioOutput) {
-                    self.captureSession.addOutput(self.audioOutput)
+                guard self.captureSession.canAddOutput(self.audioOutput) else {
+                    self.logger.warning("Cannot add audio output to monitor session")
+                    self.captureSession.commitConfiguration()
+                    committed = true
+                    return
                 }
+                self.captureSession.addOutput(self.audioOutput)
 
-                self.captureSession.startRunning()
+                // Must commit configuration before startRunning()
+                self.captureSession.commitConfiguration()
+                committed = true
+
+                if !self.captureSession.isRunning {
+                    self.captureSession.startRunning()
+                }
                 self.logger.info("Audio level monitor started for device: \(device.localizedName)")
             } catch {
                 self.logger.error("Failed to start audio level monitor: \(error.localizedDescription)")
@@ -252,15 +295,42 @@ private final class AudioLevelSampleDelegate: NSObject, AVCaptureAudioDataOutput
         if isFloat && bitsPerChannel == 32 {
             let sampleCount = totalLength / MemoryLayout<Float>.size
             guard sampleCount > 0 else { return }
-            let floatPointer = dataPointer.withMemoryRebound(to: Float.self, capacity: sampleCount) { $0 }
-            vDSP_rmsqv(floatPointer, 1, &rms, vDSP_Length(sampleCount))
-            vDSP_maxmgv(floatPointer, 1, &peak, vDSP_Length(sampleCount))
+            let rawPointer = UnsafeRawPointer(dataPointer)
+            if Int(bitPattern: rawPointer) % MemoryLayout<Float>.alignment == 0 {
+                let floatPointer = rawPointer.assumingMemoryBound(to: Float.self)
+                vDSP_rmsqv(floatPointer, 1, &rms, vDSP_Length(sampleCount))
+                vDSP_maxmgv(floatPointer, 1, &peak, vDSP_Length(sampleCount))
+            } else {
+                var alignedSamples = [Float](repeating: 0, count: sampleCount)
+                alignedSamples.withUnsafeMutableBytes { dest in
+                    _ = memcpy(dest.baseAddress!, dataPointer, totalLength)
+                }
+                alignedSamples.withUnsafeBufferPointer { buf in
+                    if let base = buf.baseAddress {
+                        vDSP_rmsqv(base, 1, &rms, vDSP_Length(sampleCount))
+                        vDSP_maxmgv(base, 1, &peak, vDSP_Length(sampleCount))
+                    }
+                }
+            }
         } else if !isFloat && bitsPerChannel == 16 {
             let sampleCount = totalLength / MemoryLayout<Int16>.size
             guard sampleCount > 0 else { return }
-            let int16Pointer = dataPointer.withMemoryRebound(to: Int16.self, capacity: sampleCount) { $0 }
+            let rawPointer = UnsafeRawPointer(dataPointer)
             var floatSamples = [Float](repeating: 0, count: sampleCount)
-            vDSP_vflt16(int16Pointer, 1, &floatSamples, 1, vDSP_Length(sampleCount))
+            if Int(bitPattern: rawPointer) % MemoryLayout<Int16>.alignment == 0 {
+                let int16Pointer = rawPointer.assumingMemoryBound(to: Int16.self)
+                vDSP_vflt16(int16Pointer, 1, &floatSamples, 1, vDSP_Length(sampleCount))
+            } else {
+                var alignedInt16 = [Int16](repeating: 0, count: sampleCount)
+                alignedInt16.withUnsafeMutableBytes { dest in
+                    _ = memcpy(dest.baseAddress!, dataPointer, totalLength)
+                }
+                alignedInt16.withUnsafeBufferPointer { buf in
+                    if let base = buf.baseAddress {
+                        vDSP_vflt16(base, 1, &floatSamples, 1, vDSP_Length(sampleCount))
+                    }
+                }
+            }
             var divisor: Float = 32768.0
             vDSP_vsdiv(floatSamples, 1, &divisor, &floatSamples, 1, vDSP_Length(sampleCount))
             vDSP_rmsqv(floatSamples, 1, &rms, vDSP_Length(sampleCount))
