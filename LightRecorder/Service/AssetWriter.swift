@@ -88,6 +88,11 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
             throw AssetWriterError.failedToCreateWriter
         }
 
+        // Configure fragmented writing if crash resilience is enabled
+        if settings.crashResilientRecording {
+            assetWriter.movieFragmentInterval = CMTime(seconds: 5, preferredTimescale: 60000)
+        }
+
         // Configure video input
         let videoSettings = AssetWriterSettings.video(from: settings, size: videoSize)
         videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)

@@ -23,6 +23,8 @@ struct MenuBarView: View {
     var body: some View {
         if viewModel.isRecording {
             recordingMenu
+        } else if viewModel.isCountingDown {
+            countdownMenu
         } else {
             idleMenu
         }
@@ -44,6 +46,20 @@ struct MenuBarView: View {
         } else {
             Text("Target: Full Screen")
         }
+
+        Divider()
+
+        footerItems
+    }
+
+    // MARK: - Active Countdown Menu
+
+    @ViewBuilder
+    private var countdownMenu: some View {
+        Button("Cancel Countdown") {
+            viewModel.cancelCountdown()
+        }
+        .keyboardShortcut(.escape, modifiers: [])
 
         Divider()
 
@@ -170,6 +186,13 @@ struct MenuBarView: View {
     private var optionsSection: some View {
         Menu("Quick Options") {
             Toggle("Show Cursor", isOn: $settings.showCursor)
+
+            Picker("Countdown", selection: $settings.countdownDuration) {
+                ForEach(CountdownDuration.allCases) { duration in
+                    Text(duration.displayName).tag(duration)
+                }
+            }
+            .pickerStyle(.inline)
 
             Picker("Frame Rate", selection: $settings.frameRate) {
                 ForEach(FrameRate.allCases) { rate in

@@ -65,6 +65,33 @@ final class AssetWriterTests: XCTestCase {
         XCTAssertEqual(result.videoFrameCount, 5)
     }
 
+    func testCrashResilientRecordingWritesPlayableFile() async throws {
+        let settings = makeStore()
+        settings.crashResilientRecording = true
+        settings.containerFormat = .mp4
+        settings.videoCodec = .h264
+
+        let url = FileManager.default.temporaryDirectory.appending(path: "\(UUID().uuidString).mp4")
+        let assetWriter = AssetWriter()
+        try assetWriter.setup(url: url, settings: settings, videoSize: videoSize)
+        try assetWriter.startWriting()
+
+        for index in 0..<5 {
+            let presentationTime = CMTime(value: CMTimeValue(index), timescale: 60)
+            assetWriter.appendVideoSample(try makeVideoSampleBuffer(at: presentationTime))
+        }
+
+        let result = try await assetWriter.finishWriting()
+        defer { try? FileManager.default.removeItem(at: result.url) }
+
+        XCTAssertEqual(result.videoFrameCount, 5)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: result.url.path))
+
+        let asset = AVURLAsset(url: result.url)
+        let isPlayable = try await asset.load(.isPlayable)
+        XCTAssertTrue(isPlayable)
+    }
+
     func testCancelAfterFinishingDoesNotDeleteTheSavedRecording() async throws {
         let settings = makeStore()
 

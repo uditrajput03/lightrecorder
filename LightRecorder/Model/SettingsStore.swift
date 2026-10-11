@@ -43,8 +43,6 @@ enum ContainerFormat: String, CaseIterable, Identifiable {
         VideoCodec.allCases
     }
 
-
-
     /// Audio codecs supported by this container format
     var supportedAudioCodecs: [AudioCodec] {
         switch self {
@@ -139,6 +137,25 @@ enum VideoQuality: String, CaseIterable, Identifiable {
     }
 }
 
+/// Countdown duration options before recording starts
+enum CountdownDuration: Int, CaseIterable, Identifiable {
+    case off = 0
+    case seconds3 = 3
+    case seconds5 = 5
+    case seconds10 = 10
+
+    var id: Int { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .off:
+            return "Off"
+        default:
+            return "\(rawValue) seconds"
+        }
+    }
+}
+
 import Combine
 
 /// Persists user preferences using UserDefaults
@@ -214,6 +231,31 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    /// Whether to write periodic movie fragments (fMP4/MOV) so recordings survive sudden crashes or power loss
+    var crashResilientRecording: Bool {
+        get {
+            defaults.bool(forKey: "crashResilientRecording")
+        }
+        set {
+            mutate {
+                defaults.set(newValue, forKey: "crashResilientRecording")
+            }
+        }
+    }
+
+    // MARK: - Recording Settings
+
+    /// Delay before recording begins to let the user prepare
+    var countdownDuration: CountdownDuration {
+        get {
+            CountdownDuration(rawValue: countdownDurationRaw) ?? .off
+        }
+        set {
+            mutate {
+                countdownDurationRaw = newValue.rawValue
+            }
+        }
+    }
 
     // MARK: - Audio Settings
 
@@ -454,6 +496,17 @@ final class SettingsStore: ObservableObject {
         set {
             mutate {
                 defaults.set(newValue, forKey: "frameRate")
+            }
+        }
+    }
+
+    private var countdownDurationRaw: Int {
+        get {
+            defaults.integer(forKey: "countdownDuration")
+        }
+        set {
+            mutate {
+                defaults.set(newValue, forKey: "countdownDuration")
             }
         }
     }

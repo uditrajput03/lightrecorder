@@ -74,6 +74,16 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertFalse(store.captureMicrophone)
     }
 
+    func testDefaultCountdownDurationIsOff() {
+        let store = makeStore()
+        XCTAssertEqual(store.countdownDuration, .off)
+    }
+
+    func testDefaultCrashResilientRecordingIsFalse() {
+        let store = makeStore()
+        XCTAssertFalse(store.crashResilientRecording)
+    }
+
     // MARK: - Codec/Container Compatibility
 
     func testH264AndHEVCWorkWithBothContainers() {
@@ -200,6 +210,26 @@ final class SettingsStoreTests: XCTestCase {
         defaults.set("H.265", forKey: "videoCodec")
         let store = SettingsStore(defaults: defaults)
         XCTAssertEqual(store.videoCodec, .hevc)
+    }
+
+    func testCountdownDurationPersists() {
+        let store = makeStore()
+        store.countdownDuration = .seconds3
+        XCTAssertEqual(store.countdownDuration, .seconds3)
+        store.countdownDuration = .seconds5
+        XCTAssertEqual(store.countdownDuration, .seconds5)
+        store.countdownDuration = .seconds10
+        XCTAssertEqual(store.countdownDuration, .seconds10)
+        store.countdownDuration = .off
+        XCTAssertEqual(store.countdownDuration, .off)
+    }
+
+    func testCrashResilientRecordingPersists() {
+        let store = makeStore()
+        store.crashResilientRecording = true
+        XCTAssertTrue(store.crashResilientRecording)
+        store.crashResilientRecording = false
+        XCTAssertFalse(store.crashResilientRecording)
     }
 
     func testBooleanSettingsPersist() {

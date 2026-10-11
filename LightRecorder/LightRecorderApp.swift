@@ -27,7 +27,7 @@ struct LightRecorderApp: App {
 
         // Settings window
         Settings {
-            SettingsView(settings: viewModel.settings)
+            SettingsView(settings: viewModel.settings, audioDeviceService: viewModel.audioDeviceService)
         }
     }
 }
@@ -43,6 +43,8 @@ struct MenuBarLabel: View {
             if let image = timerImage {
                 Image(nsImage: image)
             }
+        } else if viewModel.isCountingDown {
+            Image(systemName: "timer")
         } else {
             Image(systemName: "record.circle")
         }

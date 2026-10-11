@@ -2,16 +2,22 @@
 //  SettingsView.swift
 //  LightRecorder
 //
-//  Created by Joshua Sattler on 29.01.26.
+//  Created by Joshua Sattler on 28.03.26.
 //
 
-import AppKit
 import KeyboardShortcuts
 import SwiftUI
 
 /// The settings window for LightRecorder
+@MainActor
 struct SettingsView: View {
     @ObservedObject var settings: SettingsStore
+    @ObservedObject var audioDeviceService: AudioDeviceService
+
+    init(settings: SettingsStore, audioDeviceService: AudioDeviceService) {
+        self.settings = settings
+        self.audioDeviceService = audioDeviceService
+    }
 
     var body: some View {
         TabView {
@@ -27,7 +33,7 @@ struct SettingsView: View {
                 }
                 .tag(1)
 
-            AudioSettingsView(settings: settings)
+            AudioSettingsView(settings: settings, audioDeviceService: audioDeviceService)
                 .tabItem {
                     Label("Audio", systemImage: "waveform")
                 }
@@ -73,15 +79,21 @@ struct ShortcutsSettingsView: View {
 struct VideoSettingsView: View {
     @ObservedObject var settings: SettingsStore
 
-
     private var qualityHelpText: String {
-        "Controls the video bitrate. Higher quality produces sharper output with larger files"
+        switch settings.videoCodec {
+        case .hevc:
+            return "Bitrate presets: Low (~8 Mbps), Medium (~16 Mbps), High (~28 Mbps)"
+        case .h264:
+            return "Quality factor presets: Low (0.5), Medium (0.75), High (1.0)"
+        }
     }
 
-    private let captureNativeResHelpText = """
-        When enabled, captures at the display's native pixel resolution. \
-        When disabled, captures at the logical (1x) resolution. Has no effect on non-Retina displays
+    private var captureNativeResHelpText: String {
         """
+        When enabled, captures at physical pixel resolution (2x on Retina displays).
+        When disabled, captures at points resolution (1x).
+        """
+    }
 
     var body: some View {
         Form {
@@ -123,6 +135,9 @@ struct VideoSettingsView: View {
             Section("Advanced") {
                 Toggle("Native Resolution", isOn: $settings.captureNativeResolution)
                     .help(captureNativeResHelpText)
+
+                Toggle("Crash-Resilient Recording (Fragmented MP4)", isOn: $settings.crashResilientRecording)
+                    .help("Writes periodic movie fragments so the recording survives unexpected app termination or power loss. May reduce compatibility with certain video editors.")
             }
 
             Section("Display Elements") {
@@ -147,6 +162,7 @@ struct VideoSettingsView: View {
 
 struct AudioSettingsView: View {
     @ObservedObject var settings: SettingsStore
+    @ObservedObject var audioDeviceService: AudioDeviceService
 
     var body: some View {
         Form {
@@ -155,7 +171,23 @@ struct AudioSettingsView: View {
                     .help("Record audio from applications and system sounds")
 
                 Toggle("Capture Microphone", isOn: $settings.captureMicrophone)
-                    .help("Record audio from the default microphone input")
+                    .help("Record audio from the microphone")
+
+                if settings.captureMicrophone {
+                    if audioDeviceService.availableDevices.isEmpty {
+                        Text("No microphones detected")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Picker("Microphone Device", selection: $settings.selectedMicrophoneID) {
+                            Text("System Default").tag(Optional<String>.none)
+                            ForEach(audioDeviceService.availableDevices) { device in
+                                Text(device.name).tag(Optional<String>.some(device.id))
+                            }
+                        }
+                        .help("Select which microphone input to record")
+                    }
+                }
             }
 
             Section("Format") {
@@ -203,6 +235,15 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
+            Section("Recording") {
+                Picker("Countdown Timer", selection: $settings.countdownDuration) {
+                    ForEach(CountdownDuration.allCases) { duration in
+                        Text(duration.displayName).tag(duration)
+                    }
+                }
+                .help("Delay before recording begins to let you prepare")
+            }
+
             Section("Output Location") {
                 LabeledContent {
                     HStack {
@@ -283,7 +324,8 @@ struct AboutSection: View {
 // MARK: - Preview
 
 struct SettingsView_Previews: PreviewProvider {
+    @MainActor
     static var previews: some View {
-        SettingsView(settings: SettingsStore())
+        SettingsView(settings: SettingsStore(), audioDeviceService: AudioDeviceService())
     }
 }

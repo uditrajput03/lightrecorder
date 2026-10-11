@@ -5,12 +5,11 @@
 //  Created by Joshua Sattler on 29.01.26.
 //
 
-import Foundation
-import ScreenCaptureKit
 import AppKit
-import OSLog
-
 import Combine
+import Foundation
+import OSLog
+import ScreenCaptureKit
 
 /// The main view model managing recording state and coordination between services
 @MainActor
@@ -18,8 +17,9 @@ final class RecorderViewModel: ObservableObject {
 
     // MARK: - Recording State
 
-    enum RecordingState {
+    enum RecordingState: Equatable {
         case idle
+        case countdown
         case recording
         case stopping
     }
@@ -47,6 +47,10 @@ final class RecorderViewModel: ObservableObject {
 
     var isRecording: Bool {
         state == .recording
+    }
+
+    var isCountingDown: Bool {
+        state == .countdown
     }
 
     var canStartRecording: Bool {
@@ -87,6 +91,7 @@ final class RecorderViewModel: ObservableObject {
     private var videoSize: CGSize = .zero
     private let areaSelectionOverlay = AreaSelectionOverlay()
     private let selectionBorderFrame = SelectionBorderFrame()
+    private let countdownOverlay = CountdownOverlay()
 
     // MARK: - Initialization
 
@@ -124,6 +129,8 @@ final class RecorderViewModel: ObservableObject {
     func toggleRecording(copyToClipboard: Bool = false) async {
         if isRecording {
             await stopRecording(copyToClipboard: copyToClipboard)
+        } else if isCountingDown {
+            cancelCountdown()
         } else if hasContentSelected {
             await startRecording()
         } else {
@@ -258,6 +265,12 @@ final class RecorderViewModel: ObservableObject {
         }
     }
 
+    /// Cancels any active countdown before recording starts
+    func cancelCountdown() {
+        countdownOverlay.cancel()
+        state = .idle
+    }
+
     /// Starts a new recording session
     func startRecording() async {
         if selectedContentFilter == nil && ContentSelectionMode.current == .fullScreen {
@@ -267,6 +280,31 @@ final class RecorderViewModel: ObservableObject {
         guard canStartRecording else {
             logger.warning("Cannot start recording: no content selected or already recording")
             return
+        }
+
+        // Dismiss menu bar extra window so it doesn't linger on screen
+        dismissMenuBarWindow()
+
+        // Countdown if enabled
+        if settings.countdownDuration != .off {
+            state = .countdown
+            let screen = selectedScreen ?? NSScreen.main ?? NSScreen.screens.first
+            let targetRect = selectedScreenRect ?? screen?.frame ?? .zero
+            let targetScreen = screen ?? NSScreen.main
+
+            if let targetScreen {
+                let finished = await countdownOverlay.startCountdown(
+                    seconds: settings.countdownDuration.rawValue,
+                    in: targetRect,
+                    on: targetScreen
+                )
+
+                guard finished, state == .countdown else {
+                    logger.info("Recording countdown cancelled or interrupted")
+                    state = .idle
+                    return
+                }
+            }
         }
 
         do {
@@ -331,6 +369,11 @@ final class RecorderViewModel: ObservableObject {
 
     /// Stops the current recording session
     func stopRecording(copyToClipboard: Bool = false) async {
+        if isCountingDown {
+            cancelCountdown()
+            return
+        }
+
         guard isRecording else { return }
 
         state = .stopping

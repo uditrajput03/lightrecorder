@@ -48,14 +48,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Status Bar Click Interception
 
-    /// Intercepts clicks on the menu bar status item while a recording is in progress,
-    /// stopping the recording immediately in a single click without opening the menu popover.
+    /// Intercepts clicks on the menu bar status item while a recording or countdown is in progress,
+    /// stopping or cancelling immediately in a single click without opening the menu popover.
     private func setupStatusBarClickInterception() {
         localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown]) { [weak self] event in
             guard let self else { return event }
 
-            // Only intercept clicks while recording or stopping
-            guard self.viewModel.isRecording || self.viewModel.state == .stopping else {
+            // Only intercept clicks while recording, stopping, or counting down
+            guard self.viewModel.isRecording || self.viewModel.state == .stopping || self.viewModel.isCountingDown else {
                 return event
             }
 
@@ -75,7 +75,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
-            if self.viewModel.isRecording {
+            if self.viewModel.isCountingDown {
+                self.logger.info("Status bar button clicked while counting down; cancelling countdown.")
+                Task { @MainActor in
+                    self.viewModel.cancelCountdown()
+                }
+            } else if self.viewModel.isRecording {
                 self.logger.info("Status bar button clicked while recording; stopping recording immediately.")
                 Task { @MainActor in
                     await self.viewModel.stopRecording()

@@ -27,6 +27,7 @@
 		6C7A3DE902EE6593481F6805 /* SelectionBorderFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C59E9B3110DA0840AD8FB64 /* SelectionBorderFrame.swift */; };
 		6C7FA7D15DE4499F283393BD /* CaptureSizeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4D55F27F05D85B8473358C /* CaptureSizeCalculator.swift */; };
 		6C84C1867E269E950A4BABCE /* AreaSelectionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C83C9978B16A1576BBDDAE4 /* AreaSelectionOverlay.swift */; };
+		6C84C1867E269E950A4BCD02 /* CountdownOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C84C1867E269E950A4BCD01 /* CountdownOverlay.swift */; };
 		6C8958E7F54331ACE7E1B955 /* ContentFilterRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1A549603BEB975E6A4D47E /* ContentFilterRules.swift */; };
 		6C8D4303C5159446D6F42730 /* AssetWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C58AF26EF1DAA1A02E683E9 /* AssetWriterTests.swift */; };
 		6C8E133F0DBD04F7CC0C6A1D /* ErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7DB4633B5D4EA3BAF97D0C /* ErrorTests.swift */; };
@@ -87,6 +88,7 @@
 		6C7CE2B6151F83CA4E4BCF00 /* SettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStoreTests.swift"; sourceTree = "<group>"; };
 		6C7DB4633B5D4EA3BAF97D0C /* ErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ErrorTests.swift"; sourceTree = "<group>"; };
 		6C83C9978B16A1576BBDDAE4 /* AreaSelectionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AreaSelectionOverlay.swift"; sourceTree = "<group>"; };
+		6C84C1867E269E950A4BCD01 /* CountdownOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CountdownOverlay.swift"; sourceTree = "<group>"; };
 		6C83E22856373F37BBC9A793 /* RecorderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecorderViewModel.swift"; sourceTree = "<group>"; };
 		6C8617A041F55E572FF565E2 /* CaptureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureEngine.swift"; sourceTree = "<group>"; };
 		6C871EAE196DFF830F82DFDF /* DisplayGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DisplayGeometry.swift"; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 			isa = PBXGroup;
 			children = (
 				6C83C9978B16A1576BBDDAE4 /* AreaSelectionOverlay.swift */,
+				6C84C1867E269E950A4BCD01 /* CountdownOverlay.swift */,
 				6CC4A8D4ECD68853C9542D7D /* MenuBarView.swift */,
 				6C59E9B3110DA0840AD8FB64 /* SelectionBorderFrame.swift */,
 				6C165E9672814A238864156E /* SettingsView.swift */,
@@ -363,6 +366,7 @@
 				6C59BAFB7FB1435DB82D5ECD /* SilentAudioBuffer.swift in Sources */,
 				6C59D7DBB34566302B3BB2DF /* SystemAudioStream.swift in Sources */,
 				6C84C1867E269E950A4BABCE /* AreaSelectionOverlay.swift in Sources */,
+				6C84C1867E269E950A4BCD02 /* CountdownOverlay.swift in Sources */,
 				6C289EF160DAADC24CA6EDB3 /* MenuBarView.swift in Sources */,
 				6C7A3DE902EE6593481F6805 /* SelectionBorderFrame.swift in Sources */,
 				6C22B9BDE726225415D279B0 /* SettingsView.swift in Sources */,
