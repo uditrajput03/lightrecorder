@@ -9,6 +9,7 @@ import AppKit
 import Foundation
 import OSLog
 import ScreenCaptureKit
+import os
 
 /// A second `SCStream` that captures system audio independently of the selected content.
 ///
@@ -24,7 +25,12 @@ final class SystemAudioStream {
     private var stream: SCStream?
 
     private final class StreamIdentityBox: @unchecked Sendable {
-        var identity: ObjectIdentifier?
+        private let lock = OSAllocatedUnfairLock<ObjectIdentifier?>(initialState: nil)
+
+        var identity: ObjectIdentifier? {
+            get { lock.withLock { $0 } }
+            set { lock.withLock { $0 = newValue } }
+        }
     }
     private let identityBox = StreamIdentityBox()
 

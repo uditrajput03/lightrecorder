@@ -172,8 +172,7 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
     func appendVideoSample(_ sampleBuffer: CMSampleBuffer) {
         // Check frame status first - only process complete frames
         guard
-            let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(
-                sampleBuffer, createIfNecessary: false) as? [[String: Any]],
+            let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as? [NSDictionary],
             let attachments = attachmentsArray.first,
             let statusRawValue = attachments[SCStreamFrameInfo.status.rawValue] as? Int,
             let status = SCFrameStatus(rawValue: statusRawValue),
@@ -183,7 +182,8 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
         }
 
         lock.withLockUnchecked {
-            guard let assetWriter, assetWriter.status == .writing,
+            guard isWriting,
+                  let assetWriter, assetWriter.status == .writing,
                   let videoInput, let adaptor = pixelBufferAdaptor,
                   videoInput.isReadyForMoreMediaData
             else { return }
@@ -225,7 +225,8 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
     /// Appends a system audio sample buffer - called synchronously from capture queue
     func appendAudioSample(_ sampleBuffer: CMSampleBuffer) {
         lock.withLockUnchecked {
-            guard let assetWriter,
+            guard isWriting,
+                let assetWriter,
                 assetWriter.status == .writing,
                 let audioInput
             else {
@@ -245,7 +246,8 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
     /// Appends a microphone audio sample buffer
     func appendMicrophoneSample(_ sampleBuffer: CMSampleBuffer) {
         lock.withLockUnchecked {
-            guard let assetWriter,
+            guard isWriting,
+                let assetWriter,
                 assetWriter.status == .writing,
                 let microphoneInput
             else {
@@ -277,7 +279,8 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
             return
         }
 
-        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        let rawPTS = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        let pts = rawPTS.isNumeric ? rawPTS : CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer)
         guard pts.isNumeric else { return }
         let duration = sampleBufferDuration(sampleBuffer)
 
@@ -427,17 +430,31 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
     private func rebase(_ sampleBuffer: CMSampleBuffer, to targetPTS: CMTime) -> CMSampleBuffer? {
         guard var timings = try? sampleBuffer.sampleTimingInfos() else { return nil }
 
-        let originalPTS = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-        for index in timings.indices {
-            let delta = originalPTS.isNumeric
-                ? CMTimeSubtract(timings[index].presentationTimeStamp, originalPTS)
-                : .zero
-            timings[index].presentationTimeStamp = max(CMTimeAdd(targetPTS, delta), .zero)
-            if timings[index].decodeTimeStamp.isNumeric {
-                let dtsDelta = originalPTS.isNumeric
-                    ? CMTimeSubtract(timings[index].decodeTimeStamp, originalPTS)
+        let rawOriginalPTS = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        let originalPTS = rawOriginalPTS.isNumeric ? rawOriginalPTS : CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer)
+        if timings.isEmpty {
+            let duration = sampleBufferDuration(sampleBuffer)
+            let frameCount = CMSampleBufferGetNumSamples(sampleBuffer)
+            let sampleDuration = frameCount > 0 && duration.isNumeric
+                ? CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / Double(frameCount))
+                : .invalid
+            timings = [CMSampleTimingInfo(
+                duration: sampleDuration,
+                presentationTimeStamp: targetPTS,
+                decodeTimeStamp: .invalid
+            )]
+        } else {
+            for index in timings.indices {
+                let delta = originalPTS.isNumeric
+                    ? CMTimeSubtract(timings[index].presentationTimeStamp, originalPTS)
                     : .zero
-                timings[index].decodeTimeStamp = max(CMTimeAdd(targetPTS, dtsDelta), .zero)
+                timings[index].presentationTimeStamp = max(CMTimeAdd(targetPTS, delta), .zero)
+                if timings[index].decodeTimeStamp.isNumeric {
+                    let dtsDelta = originalPTS.isNumeric
+                        ? CMTimeSubtract(timings[index].decodeTimeStamp, originalPTS)
+                        : .zero
+                    timings[index].decodeTimeStamp = max(CMTimeAdd(targetPTS, dtsDelta), .zero)
+                }
             }
         }
 
@@ -502,6 +519,7 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
         }
 
         lock.withLockUnchecked {
+            isWriting = false
             videoInput?.markAsFinished()
             audioInput?.markAsFinished()
             microphoneInput?.markAsFinished()
@@ -522,7 +540,6 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
                 throw AssetWriterError.writingFailed(error)
             }
 
-            isWriting = false
             resetTimingState()
 
             logger.info(

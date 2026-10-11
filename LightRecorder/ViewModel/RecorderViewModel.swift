@@ -213,7 +213,8 @@ final class RecorderViewModel: ObservableObject {
             let content = try await SCShareableContent.current
             let screenNumber = result.screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID
 
-            guard let display = content.displays.first(where: { $0.displayID == screenNumber }) else {
+            guard let display = content.displays.first(where: { $0.displayID == screenNumber }) ?? content.displays.first else {
+                selectionBorderFrame.dismiss()
                 logger.error("Could not find SCDisplay for selected screen")
                 return
             }
@@ -224,6 +225,7 @@ final class RecorderViewModel: ObservableObject {
             // Convert screen rect (NSScreen coordinates, bottom-left origin) to
             // sourceRect (display coordinates, top-left origin)
             // NSScreen dimensions are in points, matching sourceRect coordinates.
+            let displayWidth = result.screen.frame.width
             let displayHeight = result.screen.frame.height
             let screenOrigin = result.screen.frame.origin
 
@@ -240,11 +242,17 @@ final class RecorderViewModel: ObservableObject {
             let evenPixelWidth = ceil(pixelWidth / 2) * 2
             let evenPixelHeight = ceil(pixelHeight / 2) * 2
 
+            // Clamp sourceRect to display bounds so it never exceeds boundaries
+            let widthInPoints = min(evenPixelWidth / scale, displayWidth)
+            let heightInPoints = min(evenPixelHeight / scale, displayHeight)
+            let safeX = max(0, min(localX, displayWidth - widthInPoints))
+            let safeY = max(0, min(flippedY, displayHeight - heightInPoints))
+
             let sourceRect = CGRect(
-                x: localX,
-                y: flippedY,
-                width: evenPixelWidth / scale,
-                height: evenPixelHeight / scale
+                x: safeX,
+                y: safeY,
+                width: widthInPoints,
+                height: heightInPoints
             )
 
             // Clear any existing picker selection (mutually exclusive)
@@ -403,6 +411,8 @@ final class RecorderViewModel: ObservableObject {
             if videoFrameCount == 0 {
                 logger.error("Recording contains no video frames: \(outputURL.lastPathComponent)")
                 notificationService.sendRecordingMissingVideoNotification(fileURL: outputURL)
+            } else if let error = lastError {
+                notificationService.sendRecordingStoppedNotification(error: error)
             } else {
                 notificationService.sendRecordingSavedNotification(fileURL: outputURL)
             }
@@ -490,6 +500,24 @@ final class RecorderViewModel: ObservableObject {
             let scale: CGFloat = selectedScreen?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1.0
             let size = CaptureSizeCalculator.videoSize(
                 contentRect: sourceRect,
+                scale: scale,
+                useNativeResolution: applyScale
+            )
+            return CGSize(
+                width: ceil(size.width / 2) * 2,
+                height: ceil(size.height / 2) * 2
+            )
+        }
+
+        // If an individual window is captured, use the window's frame
+        if let window = (filter as NSObject).value(forKey: "individualWindow") as? SCWindow {
+            let scale = CaptureSizeCalculator.windowScale(
+                windowFrame: window.frame,
+                displays: Self.connectedDisplays(),
+                fallback: pointPixelScale(for: filter)
+            )
+            let size = CaptureSizeCalculator.videoSize(
+                contentRect: window.frame,
                 scale: scale,
                 useNativeResolution: applyScale
             )

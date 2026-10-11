@@ -5,6 +5,7 @@
 //  Created by Joshua Sattler on 28.03.26.
 //
 
+import AVFoundation
 import XCTest
 @testable import LightRecorder
 
@@ -64,5 +65,27 @@ final class VideoQualityTests: XCTestCase {
 
     func testAllCasesCount() {
         XCTAssertEqual(VideoQuality.allCases.count, 3)
+    }
+
+    // MARK: - Bitrate Bounds
+
+    @MainActor
+    func testBitrateIsClampedForExtremeDimensions() {
+        let store = SettingsStore()
+        store.videoQuality = .high
+        store.videoCodec = .h264
+        store.frameRate = .fps60
+
+        // 8K resolution: 7680 x 4320
+        let largeSettings = AssetWriterSettings.video(from: store, size: CGSize(width: 7680, height: 4320))
+        let compressionProps = largeSettings[AVVideoCompressionPropertiesKey] as? [String: Any]
+        let largeBitrate = compressionProps?[AVVideoAverageBitRateKey] as? Int
+        XCTAssertEqual(largeBitrate, 200_000_000)
+
+        // Tiny size: 10 x 10
+        let smallSettings = AssetWriterSettings.video(from: store, size: CGSize(width: 10, height: 10))
+        let smallProps = smallSettings[AVVideoCompressionPropertiesKey] as? [String: Any]
+        let smallBitrate = smallProps?[AVVideoAverageBitRateKey] as? Int
+        XCTAssertEqual(smallBitrate, 1_000_000)
     }
 }

@@ -251,9 +251,7 @@ final class SettingsStore: ObservableObject {
             CountdownDuration(rawValue: countdownDurationRaw) ?? .off
         }
         set {
-            mutate {
-                countdownDurationRaw = newValue.rawValue
-            }
+            countdownDurationRaw = newValue.rawValue
         }
     }
 
@@ -401,10 +399,20 @@ final class SettingsStore: ObservableObject {
         customOutputDirectoryBookmark != nil
     }
 
+    /// Cached resolved URL for the security-scoped output directory
+    private var cachedOutputDirectory: URL?
+    private var cachedBookmarkData: Data?
+
     /// The current output directory, using custom path if set
     var outputDirectory: URL {
         guard let bookmarkData = customOutputDirectoryBookmark else {
+            cachedOutputDirectory = nil
+            cachedBookmarkData = nil
             return defaultOutputDirectory
+        }
+
+        if let cached = cachedOutputDirectory, cachedBookmarkData == bookmarkData {
+            return cached
         }
 
         do {
@@ -425,14 +433,20 @@ final class SettingsStore: ObservableObject {
                         includingResourceValuesForKeys: nil,
                         relativeTo: nil
                     ) {
+                        cachedOutputDirectory = url
+                        cachedBookmarkData = newBookmark
                         customOutputDirectoryBookmark = newBookmark
                     }
                 }
             }
 
+            cachedOutputDirectory = url
+            cachedBookmarkData = bookmarkData
             return url
         } catch {
             // If bookmark resolution fails, fall back to default
+            cachedOutputDirectory = nil
+            cachedBookmarkData = nil
             return defaultOutputDirectory
         }
     }
@@ -453,9 +467,13 @@ final class SettingsStore: ObservableObject {
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
+            cachedOutputDirectory = url
+            cachedBookmarkData = bookmarkData
             customOutputDirectoryBookmark = bookmarkData
         } catch {
             if let bookmarkData = try? url.bookmarkData() {
+                cachedOutputDirectory = url
+                cachedBookmarkData = bookmarkData
                 customOutputDirectoryBookmark = bookmarkData
             }
         }
@@ -463,6 +481,8 @@ final class SettingsStore: ObservableObject {
 
     /// Resets to the default output directory
     func resetOutputDirectory() {
+        cachedOutputDirectory = nil
+        cachedBookmarkData = nil
         customOutputDirectoryBookmark = nil
     }
 

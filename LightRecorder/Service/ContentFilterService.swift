@@ -63,6 +63,12 @@ final class ContentFilterService {
 
     /// Applies user settings to a content filter
     func applySettings(to filter: SCContentFilter, settings: SettingsStore) async throws -> SCContentFilter {
+        // Content filter settings (wallpaper, dock, etc.) only apply to display captures.
+        // Individual window captures or application captures must be preserved as-is.
+        guard CaptureFilterStyle(filter) == .display else {
+            return filter
+        }
+
         let visibility = ContentVisibility(settings: settings)
         guard ContentFilterRules.requiresRebuild(visibility: visibility) else {
             return filter

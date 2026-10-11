@@ -55,7 +55,14 @@ struct MenuBarLabel: View {
     private var timerImage: NSImage? {
         let text = viewModel.formattedDuration
 
-        let referenceText = viewModel.recordingDuration >= 3600 ? "0:00:00" : "00:00"
+        let referenceText: String
+        if viewModel.recordingDuration >= 36000 {
+            referenceText = "00:00:00"
+        } else if viewModel.recordingDuration >= 3600 {
+            referenceText = "0:00:00"
+        } else {
+            referenceText = "00:00"
+        }
 
         let font = NSFont.monospacedDigitSystemFont(ofSize: 13, weight: .regular)
         let attrs: [NSAttributedString.Key: Any] = [
