@@ -1,0 +1,84 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.swift'
+      - '**.xcodeproj/**'
+      - '**.xctestplan'
+      - '.github/workflows/pull-request.yml'
+
+env:
+  APP_NAME: LightRecorder
+  SCHEME: LightRecorder
+  XCODE_VERSION: '16.2'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: macos-15
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --reporter github-actions-logging
+
+  build:
+    name: Build
+    runs-on: macos-15
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_${{ env.XCODE_VERSION }}.app"
+          fi
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build application
+        run: |
+          xcodebuild build \
+            -project "${{ env.APP_NAME }}.xcodeproj" \
+            -scheme "${{ env.SCHEME }}" \
+            -configuration Debug \
+            -destination "platform=macOS" \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO
+
+  test:
+    name: Test
+    runs-on: macos-15
+    needs: build
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_${{ env.XCODE_VERSION }}.app"
+          fi
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -project "${{ env.APP_NAME }}.xcodeproj" \
+            -scheme "${{ env.SCHEME }}" \
+            -destination "platform=macOS" \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO

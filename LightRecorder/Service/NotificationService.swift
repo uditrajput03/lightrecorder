@@ -1,0 +1,249 @@
+//
+//  NotificationService.swift
+//  LightRecorder
+//
+//  Created by Joshua Sattler on 06.02.26.
+//
+
+import Foundation
+import UserNotifications
+import AppKit
+import OSLog
+
+import Combine
+
+/// Service responsible for managing user notifications
+@MainActor
+final class NotificationService: NSObject, ObservableObject {
+
+    // MARK: - Constants
+
+    private enum NotificationIdentifier {
+        static let categoryRecordingSaved = "RECORDING_SAVED"
+        static let categoryRecordingFailed = "RECORDING_FAILED"
+        static let actionShowInFinder = "SHOW_IN_FINDER"
+    }
+
+    private enum UserInfoKey {
+        static let folderURL = "folderURL"
+    }
+
+    // MARK: - Properties
+
+    private let settings: SettingsStore
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "LightRecorder",
+        category: "NotificationService"
+    )
+
+    // MARK: - Initialization
+
+    init(settings: SettingsStore) {
+        self.settings = settings
+        super.init()
+        setupNotificationDelegate()
+        registerNotificationCategories()
+        requestNotificationPermission()
+    }
+
+    // MARK: - Setup
+
+    private func setupNotificationDelegate() {
+        UNUserNotificationCenter.current().delegate = self
+    }
+
+    private func registerNotificationCategories() {
+        // Action to show recording in Finder
+        let showInFinderAction = UNNotificationAction(
+            identifier: NotificationIdentifier.actionShowInFinder,
+            title: "Show in Finder",
+            options: [.foreground]
+        )
+
+        // Category for successful recording with action
+        let recordingSavedCategory = UNNotificationCategory(
+            identifier: NotificationIdentifier.categoryRecordingSaved,
+            actions: [showInFinderAction],
+            intentIdentifiers: []
+        )
+
+        // Category for failed recording (no actions needed)
+        let recordingFailedCategory = UNNotificationCategory(
+            identifier: NotificationIdentifier.categoryRecordingFailed,
+            actions: [],
+            intentIdentifiers: []
+        )
+
+        UNUserNotificationCenter.current().setNotificationCategories([
+            recordingSavedCategory,
+            recordingFailedCategory
+        ])
+    }
+
+    private func requestNotificationPermission() {
+        Task {
+            do {
+                let granted = try await UNUserNotificationCenter.current()
+                    .requestAuthorization(options: [.alert, .sound])
+                if granted {
+                    logger.info("Notification permission granted")
+                } else {
+                    logger.warning("Notification permission denied")
+                }
+            } catch {
+                logger.error("Notification permission error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    // MARK: - Public Methods
+
+    /// Sends a notification for a successfully saved recording
+    /// - Parameter fileURL: The URL of the saved recording file
+    func sendRecordingSavedNotification(fileURL: URL) {
+        send(
+            title: "Recording Saved",
+            body: "Your recording has been saved to \(fileURL.lastPathComponent)",
+            category: NotificationIdentifier.categoryRecordingSaved,
+            folderURL: fileURL.deletingLastPathComponent()
+        )
+    }
+
+    /// Sends a notification for a recording that was saved without any video frames
+    /// - Parameter fileURL: The URL of the saved recording file
+    func sendRecordingMissingVideoNotification(fileURL: URL) {
+        send(
+            title: "Recording Saved Without Video",
+            body: "No video was captured. Only audio was saved to \(fileURL.lastPathComponent)",
+            category: NotificationIdentifier.categoryRecordingSaved,
+            folderURL: fileURL.deletingLastPathComponent()
+        )
+    }
+
+    /// Sends a notification for a recording that could not be started
+    ///
+    /// Start failures leave nothing on disk, so they are reported separately from
+    /// failures that lose an in-progress recording.
+    /// - Parameter error: The error that prevented the recording from starting
+    func sendRecordingStartFailedNotification(error: Error) {
+        send(
+            title: "Can't Start Recording",
+            body: error.localizedDescription,
+            category: NotificationIdentifier.categoryRecordingFailed
+        )
+    }
+
+    /// Sends a notification for a failed recording
+    /// - Parameter error: The error that caused the recording to fail
+    func sendRecordingFailedNotification(error: Error) {
+        send(
+            title: "Recording Failed",
+            body: "Your recording could not be saved: \(error.localizedDescription)",
+            category: NotificationIdentifier.categoryRecordingFailed
+        )
+    }
+
+    /// Sends a notification when system audio could not be captured
+    ///
+    /// The video recording continues, so this is reported without stopping anything.
+    /// - Parameter error: The error that prevented system audio capture, if any
+    func sendSystemAudioFailedNotification(error: Error?) {
+        let reason = error.map { ": \($0.localizedDescription)" } ?? ""
+
+        send(
+            title: "System Audio Not Recorded",
+            body: "Recording continues without system audio\(reason)",
+            category: NotificationIdentifier.categoryRecordingFailed
+        )
+    }
+
+    /// Sends a notification when recording stopped unexpectedly
+    /// - Parameter error: Optional error that caused the stop
+    func sendRecordingStoppedNotification(error: Error?) {
+        let reason = error.map { ": \($0.localizedDescription)" } ?? ""
+
+        send(
+            title: "Recording Stopped",
+            body: "Recording stopped unexpectedly\(reason)",
+            category: NotificationIdentifier.categoryRecordingFailed
+        )
+    }
+
+    // MARK: - Private Methods
+
+    /// Builds and delivers a notification request
+    /// - Parameters:
+    ///   - title: The notification title
+    ///   - body: The notification body
+    ///   - category: The category identifier determining the available actions
+    ///   - folderURL: Folder to reveal when the notification is clicked, if any
+    private func send(title: String, body: String, category: String, folderURL: URL? = nil) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = category
+
+        // Store the folder URL for opening when notification is clicked
+        if let folderURL {
+            content.userInfo = [UserInfoKey.folderURL: folderURL.path()]
+        }
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+
+        Task {
+            do {
+                try await UNUserNotificationCenter.current().add(request)
+                logger.info("Notification sent: \(title)")
+            } catch {
+                logger.error("Failed to send notification '\(title)': \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func openFolderInFinder(path: String) {
+        _ = settings.startAccessingOutputDirectory()
+        defer { settings.stopAccessingOutputDirectory() }
+        let url = URL(filePath: path)
+        NSWorkspace.shared.open(url)
+    }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension NotificationService: UNUserNotificationCenterDelegate {
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        // Show notifications even when app is in foreground
+        [.banner, .sound]
+    }
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        let userInfo = response.notification.request.content.userInfo
+        let categoryIdentifier = response.notification.request.content.categoryIdentifier
+
+        switch response.actionIdentifier {
+        case NotificationIdentifier.actionShowInFinder,
+            UNNotificationDefaultActionIdentifier where categoryIdentifier == NotificationIdentifier.categoryRecordingSaved:
+            // User tapped the notification or the "Show in Finder" action
+            if let folderPath = userInfo[UserInfoKey.folderURL] as? String {
+                await MainActor.run {
+                    openFolderInFinder(path: folderPath)
+                }
+            }
+
+        default:
+            break
+        }
+    }
+}

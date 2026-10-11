@@ -1,0 +1,611 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6C0E40C398CBD26A142A9330 /* LightRecorderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5447DB6DDC735F6A294251 /* LightRecorderApp.swift */; };
+		6C1386F2414B8DCDA18B64AB /* ContentFilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0B6F54D21927B927C5F299 /* ContentFilterService.swift */; };
+		6C164D5BB4C7401940000A18 /* CaptureFilterStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C21D6B6D7EEA662044CE572 /* CaptureFilterStyle.swift */; };
+		6C2133D8637F5D2B766AEDA8 /* AssetWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3307BE6C804FE8D29B6ADC /* AssetWriter.swift */; };
+		6C22B9BDE726225415D279B0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C165E9672814A238864156E /* SettingsView.swift */; };
+		6C231775085EB67F6D4A5FAA /* ContentVisibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C99741D92256F655C0DCF1A /* ContentVisibility.swift */; };
+		6C23BD68693DFFBC270D284F /* CaptureEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8617A041F55E572FF565E2 /* CaptureEngine.swift */; };
+		6C289EF160DAADC24CA6EDB3 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC4A8D4ECD68853C9542D7D /* MenuBarView.swift */; };
+		6C290507B1BF181A4D1BFDA5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFCC78C3F70C3F261FBD735 /* AppDelegate.swift */; };
+		6C2D58BE05C29364730C7FE5 /* AssetWriterError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD9195B482FD874E21BABD2 /* AssetWriterError.swift */; };
+		6C3A5B85C17289E341828BE5 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4FA8C0E832EC618EC90E94 /* SettingsStore.swift */; };
+		6C57618E65BB5393520D22B4 /* CapturableWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1B1530935FEA137B4C4533 /* CapturableWindow.swift */; };
+		6C591544DA688BD0088A3B61 /* AudioDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C04FAD5B95A991A18038F72 /* AudioDeviceService.swift */; };
+		6C59BAFB7FB1435DB82D5ECD /* SilentAudioBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB900CEC2B742E8FE2CEE32 /* SilentAudioBuffer.swift */; };
+		6C59D7DBB34566302B3BB2DF /* SystemAudioStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4B65FC128A4853E57EAC56 /* SystemAudioStream.swift */; };
+		6C71611818212DB813FB2FAB /* VideoQualityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0FBA236942A0F3D807FCB6 /* VideoQualityTests.swift */; };
+		6C780574F4FBD4C88C900B2B /* ContainerFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8BA52B8F0E596F341AFBCD /* ContainerFormatTests.swift */; };
+		6C7A3DE902EE6593481F6805 /* SelectionBorderFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C59E9B3110DA0840AD8FB64 /* SelectionBorderFrame.swift */; };
+		6C7FA7D15DE4499F283393BD /* CaptureSizeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4D55F27F05D85B8473358C /* CaptureSizeCalculator.swift */; };
+		6C84C1867E269E950A4BABCE /* AreaSelectionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C83C9978B16A1576BBDDAE4 /* AreaSelectionOverlay.swift */; };
+		6C8958E7F54331ACE7E1B955 /* ContentFilterRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1A549603BEB975E6A4D47E /* ContentFilterRules.swift */; };
+		6C8D4303C5159446D6F42730 /* AssetWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C58AF26EF1DAA1A02E683E9 /* AssetWriterTests.swift */; };
+		6C8E133F0DBD04F7CC0C6A1D /* ErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7DB4633B5D4EA3BAF97D0C /* ErrorTests.swift */; };
+		6C9DF4D350D8FEB1E974EFA1 /* DisplayGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C871EAE196DFF830F82DFDF /* DisplayGeometry.swift */; };
+		6CA1B0012F8700000082CE23 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 6CA1B0002F8700000082CE23 /* KeyboardShortcuts */; };
+		6CA90A40F8EA7F3C4B94D021 /* SettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7CE2B6151F83CA4E4BCF00 /* SettingsStoreTests.swift */; };
+		6CA9FAFD7150BED1F73FC4BF /* SilentAudioBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C707F85596F570C515922BA /* SilentAudioBufferTests.swift */; };
+		6CBA01609F767CFE324F22FB /* FrameRateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C99142D907093477FFDB8A2 /* FrameRateTests.swift */; };
+		6CBA490592E7D6CF7D240417 /* MicrophoneCaptureSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C6C62794482C5F41F1A9E8D /* MicrophoneCaptureSession.swift */; };
+		6CBF2ABC23DDCA92968E9CDB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6CCBB537B0204AE60DB119D0 /* Assets.xcassets */; };
+		6CC49F4446CA02D521D9F718 /* ContentSelectionMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF59E0974449A6783A6BC0E /* ContentSelectionMode.swift */; };
+		6CCD0EEB7B697EE1C21F02C9 /* AssetWriterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF51D1ED622826D2BCCFFBA /* AssetWriterSettings.swift */; };
+		6CCD90F4A326146AB1C3A414 /* KeyboardShortcutNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5648BB8864562B57F2D7F9 /* KeyboardShortcutNames.swift */; };
+		6CD28C1C2D8435762B083CAC /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0EC262A1D64E90287777E9 /* NotificationService.swift */; };
+		6CDAD3CACD613DE359A72595 /* RecorderViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF237227145C337D7C2D8A3 /* RecorderViewModelTests.swift */; };
+		6CDD8F744565E540329A4F21 /* VideoCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C15100E8A2A1881E65BEB02 /* VideoCodecTests.swift */; };
+		6CE8CBEEF14B4DCE613B111F /* ContentFilterRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3B1DE395D94E43AB2773FC /* ContentFilterRulesTests.swift */; };
+		6CEFCF2D11BF8638D2955EFE /* RecorderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C83E22856373F37BBC9A793 /* RecorderViewModel.swift */; };
+		6CF11FBD6AED2945FFA04449 /* CaptureSizeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5481413CA39A7B2BA9E0A6 /* CaptureSizeCalculatorTests.swift */; };
+		6CFAB89E934995CA72A561BF /* PermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAC1A3C12DDAC4E19ACFFC7 /* PermissionService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6C7AABC62F783B98006496CE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6C0990A72F2BE0C100D48100 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6C0990AE2F2BE0C100D48100;
+			remoteInfo = LightRecorder;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		6C04FAD5B95A991A18038F72 /* AudioDeviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioDeviceService.swift"; sourceTree = "<group>"; };
+		6C0990AF2F2BE0C100D48100 /* LightRecorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LightRecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C0B6F54D21927B927C5F299 /* ContentFilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentFilterService.swift"; sourceTree = "<group>"; };
+		6C0EC262A1D64E90287777E9 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NotificationService.swift"; sourceTree = "<group>"; };
+		6C0FBA236942A0F3D807FCB6 /* VideoQualityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoQualityTests.swift"; sourceTree = "<group>"; };
+		6C15100E8A2A1881E65BEB02 /* VideoCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoCodecTests.swift"; sourceTree = "<group>"; };
+		6C165E9672814A238864156E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		6C1A549603BEB975E6A4D47E /* ContentFilterRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentFilterRules.swift"; sourceTree = "<group>"; };
+		6C1B1530935FEA137B4C4533 /* CapturableWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CapturableWindow.swift"; sourceTree = "<group>"; };
+		6C21D6B6D7EEA662044CE572 /* CaptureFilterStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureFilterStyle.swift"; sourceTree = "<group>"; };
+		6C3307BE6C804FE8D29B6ADC /* AssetWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AssetWriter.swift"; sourceTree = "<group>"; };
+		6C3B1DE395D94E43AB2773FC /* ContentFilterRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentFilterRulesTests.swift"; sourceTree = "<group>"; };
+		6C4B65FC128A4853E57EAC56 /* SystemAudioStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SystemAudioStream.swift"; sourceTree = "<group>"; };
+		6C4D55F27F05D85B8473358C /* CaptureSizeCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureSizeCalculator.swift"; sourceTree = "<group>"; };
+		6C4FA8C0E832EC618EC90E94 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStore.swift"; sourceTree = "<group>"; };
+		6C5447DB6DDC735F6A294251 /* LightRecorderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LightRecorderApp.swift"; sourceTree = "<group>"; };
+		6C5481413CA39A7B2BA9E0A6 /* CaptureSizeCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureSizeCalculatorTests.swift"; sourceTree = "<group>"; };
+		6C5648BB8864562B57F2D7F9 /* KeyboardShortcutNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyboardShortcutNames.swift"; sourceTree = "<group>"; };
+		6C58AF26EF1DAA1A02E683E9 /* AssetWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AssetWriterTests.swift"; sourceTree = "<group>"; };
+		6C59E9B3110DA0840AD8FB64 /* SelectionBorderFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectionBorderFrame.swift"; sourceTree = "<group>"; };
+		6C5EE6C690D344023372C950 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6C6C62794482C5F41F1A9E8D /* MicrophoneCaptureSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneCaptureSession.swift"; sourceTree = "<group>"; };
+		6C707F85596F570C515922BA /* SilentAudioBufferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SilentAudioBufferTests.swift"; sourceTree = "<group>"; };
+		6C7AABC22F783B98006496CE /* LightRecorderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LightRecorderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C7CE2B6151F83CA4E4BCF00 /* SettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStoreTests.swift"; sourceTree = "<group>"; };
+		6C7DB4633B5D4EA3BAF97D0C /* ErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ErrorTests.swift"; sourceTree = "<group>"; };
+		6C83C9978B16A1576BBDDAE4 /* AreaSelectionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AreaSelectionOverlay.swift"; sourceTree = "<group>"; };
+		6C83E22856373F37BBC9A793 /* RecorderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecorderViewModel.swift"; sourceTree = "<group>"; };
+		6C8617A041F55E572FF565E2 /* CaptureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CaptureEngine.swift"; sourceTree = "<group>"; };
+		6C871EAE196DFF830F82DFDF /* DisplayGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DisplayGeometry.swift"; sourceTree = "<group>"; };
+		6C8BA52B8F0E596F341AFBCD /* ContainerFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContainerFormatTests.swift"; sourceTree = "<group>"; };
+		6C99142D907093477FFDB8A2 /* FrameRateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FrameRateTests.swift"; sourceTree = "<group>"; };
+		6C99741D92256F655C0DCF1A /* ContentVisibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentVisibility.swift"; sourceTree = "<group>"; };
+		6CAC1A3C12DDAC4E19ACFFC7 /* PermissionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionService.swift"; sourceTree = "<group>"; };
+		6CB900CEC2B742E8FE2CEE32 /* SilentAudioBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SilentAudioBuffer.swift"; sourceTree = "<group>"; };
+		6CC4A8D4ECD68853C9542D7D /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MenuBarView.swift"; sourceTree = "<group>"; };
+		6CCBB537B0204AE60DB119D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6CD9195B482FD874E21BABD2 /* AssetWriterError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AssetWriterError.swift"; sourceTree = "<group>"; };
+		6CE53F99FBFDB22FC54AFCC9 /* LightRecorder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LightRecorder.entitlements; sourceTree = "<group>"; };
+		6CF237227145C337D7C2D8A3 /* RecorderViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecorderViewModelTests.swift"; sourceTree = "<group>"; };
+		6CF51D1ED622826D2BCCFFBA /* AssetWriterSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AssetWriterSettings.swift"; sourceTree = "<group>"; };
+		6CF59E0974449A6783A6BC0E /* ContentSelectionMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentSelectionMode.swift"; sourceTree = "<group>"; };
+		6CFCC78C3F70C3F261FBD735 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6C0990AC2F2BE0C100D48100 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6CA1B0012F8700000082CE23 /* KeyboardShortcuts in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C7AABBF2F783B98006496CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6C8B3136D1F4AE2437B1B054 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				6C1B1530935FEA137B4C4533 /* CapturableWindow.swift */,
+				6C21D6B6D7EEA662044CE572 /* CaptureFilterStyle.swift */,
+				6CF59E0974449A6783A6BC0E /* ContentSelectionMode.swift */,
+				6C99741D92256F655C0DCF1A /* ContentVisibility.swift */,
+				6C871EAE196DFF830F82DFDF /* DisplayGeometry.swift */,
+				6C5648BB8864562B57F2D7F9 /* KeyboardShortcutNames.swift */,
+				6C4FA8C0E832EC618EC90E94 /* SettingsStore.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		6CADC4D98FF1B5BDECB9ED29 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				6C3307BE6C804FE8D29B6ADC /* AssetWriter.swift */,
+				6CD9195B482FD874E21BABD2 /* AssetWriterError.swift */,
+				6CF51D1ED622826D2BCCFFBA /* AssetWriterSettings.swift */,
+				6C04FAD5B95A991A18038F72 /* AudioDeviceService.swift */,
+				6C8617A041F55E572FF565E2 /* CaptureEngine.swift */,
+				6C4D55F27F05D85B8473358C /* CaptureSizeCalculator.swift */,
+				6C1A549603BEB975E6A4D47E /* ContentFilterRules.swift */,
+				6C0B6F54D21927B927C5F299 /* ContentFilterService.swift */,
+				6C6C62794482C5F41F1A9E8D /* MicrophoneCaptureSession.swift */,
+				6C0EC262A1D64E90287777E9 /* NotificationService.swift */,
+				6CAC1A3C12DDAC4E19ACFFC7 /* PermissionService.swift */,
+				6CB900CEC2B742E8FE2CEE32 /* SilentAudioBuffer.swift */,
+				6C4B65FC128A4853E57EAC56 /* SystemAudioStream.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		6C71E634C6BFAE023D7F4995 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				6C83C9978B16A1576BBDDAE4 /* AreaSelectionOverlay.swift */,
+				6CC4A8D4ECD68853C9542D7D /* MenuBarView.swift */,
+				6C59E9B3110DA0840AD8FB64 /* SelectionBorderFrame.swift */,
+				6C165E9672814A238864156E /* SettingsView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		6CB144E9223C8770F9860CCC /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				6C83E22856373F37BBC9A793 /* RecorderViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		6CFA67C0C5BE2E332F9841DA /* LightRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				6C8B3136D1F4AE2437B1B054 /* Model */,
+				6CADC4D98FF1B5BDECB9ED29 /* Service */,
+				6C71E634C6BFAE023D7F4995 /* View */,
+				6CB144E9223C8770F9860CCC /* ViewModel */,
+				6CFCC78C3F70C3F261FBD735 /* AppDelegate.swift */,
+				6C5447DB6DDC735F6A294251 /* LightRecorderApp.swift */,
+				6CCBB537B0204AE60DB119D0 /* Assets.xcassets */,
+				6C5EE6C690D344023372C950 /* Info.plist */,
+				6CE53F99FBFDB22FC54AFCC9 /* LightRecorder.entitlements */,
+			);
+			path = LightRecorder;
+			sourceTree = "<group>";
+		};
+		6CBCEA913457A9A00364A4A8 /* LightRecorderTests */ = {
+			isa = PBXGroup;
+			children = (
+				6C58AF26EF1DAA1A02E683E9 /* AssetWriterTests.swift */,
+				6C5481413CA39A7B2BA9E0A6 /* CaptureSizeCalculatorTests.swift */,
+				6C8BA52B8F0E596F341AFBCD /* ContainerFormatTests.swift */,
+				6C3B1DE395D94E43AB2773FC /* ContentFilterRulesTests.swift */,
+				6C7DB4633B5D4EA3BAF97D0C /* ErrorTests.swift */,
+				6C99142D907093477FFDB8A2 /* FrameRateTests.swift */,
+				6CF237227145C337D7C2D8A3 /* RecorderViewModelTests.swift */,
+				6C7CE2B6151F83CA4E4BCF00 /* SettingsStoreTests.swift */,
+				6C707F85596F570C515922BA /* SilentAudioBufferTests.swift */,
+				6C15100E8A2A1881E65BEB02 /* VideoCodecTests.swift */,
+				6C0FBA236942A0F3D807FCB6 /* VideoQualityTests.swift */,
+			);
+			path = LightRecorderTests;
+			sourceTree = "<group>";
+		};
+		6C0990B02F2BE0C100D48100 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6C0990AF2F2BE0C100D48100 /* LightRecorder.app */,
+				6C7AABC22F783B98006496CE /* LightRecorderTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6C72991DF72234933AB0F803 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6C0990A62F2BE0C100D48100 = {
+			isa = PBXGroup;
+			children = (
+				6CFA67C0C5BE2E332F9841DA /* LightRecorder */,
+				6CBCEA913457A9A00364A4A8 /* LightRecorderTests */,
+				6C0990B02F2BE0C100D48100 /* Products */,
+				6C72991DF72234933AB0F803 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6C0990AE2F2BE0C100D48100 /* LightRecorder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C0990CD2F2BE0C200D48100 /* Build configuration list for PBXNativeTarget "LightRecorder" */;
+			buildPhases = (
+				6C0990AB2F2BE0C100D48100 /* Sources */,
+				6C0990AC2F2BE0C100D48100 /* Frameworks */,
+				6C0990AD2F2BE0C100D48100 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LightRecorder;
+			packageProductDependencies = (
+				6CA1B0002F8700000082CE23 /* KeyboardShortcuts */,
+			);
+			productName = LightRecorder;
+			productReference = 6C0990AF2F2BE0C100D48100 /* LightRecorder.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6C7AABC12F783B98006496CE /* LightRecorderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C7AABC32F783B98006496CE /* Build configuration list for PBXNativeTarget "LightRecorderTests" */;
+			buildPhases = (
+				6C7AABBE2F783B98006496CE /* Sources */,
+				6C7AABBF2F783B98006496CE /* Frameworks */,
+				6C7AABC02F783B98006496CE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6C7AABC72F783B98006496CE /* PBXTargetDependency */,
+			);
+			name = LightRecorderTests;
+			productName = LightRecorderTests;
+			productReference = 6C7AABC22F783B98006496CE /* LightRecorderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6C0990A72F2BE0C100D48100 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					6C0990AE2F2BE0C100D48100 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+					6C7AABC12F783B98006496CE = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = 6C0990AE2F2BE0C100D48100;
+					};
+				};
+			};
+			buildConfigurationList = 6C0990AA2F2BE0C100D48100 /* Build configuration list for PBXProject "LightRecorder" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6C0990A62F2BE0C100D48100;
+			packageReferences = (
+				6CA1AFFF2F8700000082CE23 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+			);
+			productRefGroup = 6C0990B02F2BE0C100D48100 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6C0990AE2F2BE0C100D48100 /* LightRecorder */,
+				6C7AABC12F783B98006496CE /* LightRecorderTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6C0990AD2F2BE0C100D48100 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6CBF2ABC23DDCA92968E9CDB /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C7AABC02F783B98006496CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6C0990AB2F2BE0C100D48100 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6C57618E65BB5393520D22B4 /* CapturableWindow.swift in Sources */,
+				6C164D5BB4C7401940000A18 /* CaptureFilterStyle.swift in Sources */,
+				6CC49F4446CA02D521D9F718 /* ContentSelectionMode.swift in Sources */,
+				6C231775085EB67F6D4A5FAA /* ContentVisibility.swift in Sources */,
+				6C9DF4D350D8FEB1E974EFA1 /* DisplayGeometry.swift in Sources */,
+				6CCD90F4A326146AB1C3A414 /* KeyboardShortcutNames.swift in Sources */,
+				6C3A5B85C17289E341828BE5 /* SettingsStore.swift in Sources */,
+				6C2133D8637F5D2B766AEDA8 /* AssetWriter.swift in Sources */,
+				6C2D58BE05C29364730C7FE5 /* AssetWriterError.swift in Sources */,
+				6CCD0EEB7B697EE1C21F02C9 /* AssetWriterSettings.swift in Sources */,
+				6C591544DA688BD0088A3B61 /* AudioDeviceService.swift in Sources */,
+				6C23BD68693DFFBC270D284F /* CaptureEngine.swift in Sources */,
+				6C7FA7D15DE4499F283393BD /* CaptureSizeCalculator.swift in Sources */,
+				6C8958E7F54331ACE7E1B955 /* ContentFilterRules.swift in Sources */,
+				6C1386F2414B8DCDA18B64AB /* ContentFilterService.swift in Sources */,
+				6CBA490592E7D6CF7D240417 /* MicrophoneCaptureSession.swift in Sources */,
+				6CD28C1C2D8435762B083CAC /* NotificationService.swift in Sources */,
+				6CFAB89E934995CA72A561BF /* PermissionService.swift in Sources */,
+				6C59BAFB7FB1435DB82D5ECD /* SilentAudioBuffer.swift in Sources */,
+				6C59D7DBB34566302B3BB2DF /* SystemAudioStream.swift in Sources */,
+				6C84C1867E269E950A4BABCE /* AreaSelectionOverlay.swift in Sources */,
+				6C289EF160DAADC24CA6EDB3 /* MenuBarView.swift in Sources */,
+				6C7A3DE902EE6593481F6805 /* SelectionBorderFrame.swift in Sources */,
+				6C22B9BDE726225415D279B0 /* SettingsView.swift in Sources */,
+				6CEFCF2D11BF8638D2955EFE /* RecorderViewModel.swift in Sources */,
+				6C290507B1BF181A4D1BFDA5 /* AppDelegate.swift in Sources */,
+				6C0E40C398CBD26A142A9330 /* LightRecorderApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C7AABBE2F783B98006496CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6C8D4303C5159446D6F42730 /* AssetWriterTests.swift in Sources */,
+				6CF11FBD6AED2945FFA04449 /* CaptureSizeCalculatorTests.swift in Sources */,
+				6C780574F4FBD4C88C900B2B /* ContainerFormatTests.swift in Sources */,
+				6CE8CBEEF14B4DCE613B111F /* ContentFilterRulesTests.swift in Sources */,
+				6C8E133F0DBD04F7CC0C6A1D /* ErrorTests.swift in Sources */,
+				6CBA01609F767CFE324F22FB /* FrameRateTests.swift in Sources */,
+				6CDAD3CACD613DE359A72595 /* RecorderViewModelTests.swift in Sources */,
+				6CA90A40F8EA7F3C4B94D021 /* SettingsStoreTests.swift in Sources */,
+				6CA9FAFD7150BED1F73FC4BF /* SilentAudioBufferTests.swift in Sources */,
+				6CDD8F744565E540329A4F21 /* VideoCodecTests.swift in Sources */,
+				6C71611818212DB813FB2FAB /* VideoQualityTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6C7AABC72F783B98006496CE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6C0990AE2F2BE0C100D48100 /* LightRecorder */;
+			targetProxy = 6C7AABC62F783B98006496CE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6C0990CE2F2BE0C200D48100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		6C0990CF2F2BE0C200D48100 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = "wholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		6C0990D12F2BE0C200D48100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = LightRecorder;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LightRecorder/LightRecorder.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGNING_REQUIRED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LightRecorder/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LightRecorder;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lightrecorder.LightRecorder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6C0990D22F2BE0C200D48100 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = LightRecorder;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LightRecorder/LightRecorder.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGNING_REQUIRED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LightRecorder/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LightRecorder;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lightrecorder.LightRecorder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		6C7AABC82F783B98006496CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lightrecorder.LightRecorderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LightRecorder.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LightRecorder";
+			};
+			name = Debug;
+		};
+		6C7AABC92F783B98006496CE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lightrecorder.LightRecorderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LightRecorder.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LightRecorder";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6C0990AA2F2BE0C100D48100 /* Build configuration list for PBXProject "LightRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6C0990CE2F2BE0C200D48100 /* Debug */,
+				6C0990CF2F2BE0C200D48100 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6C0990CD2F2BE0C200D48100 /* Build configuration list for PBXNativeTarget "LightRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6C0990D12F2BE0C200D48100 /* Debug */,
+				6C0990D22F2BE0C200D48100 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6C7AABC32F783B98006496CE /* Build configuration list for PBXNativeTarget "LightRecorderTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6C7AABC82F783B98006496CE /* Debug */,
+				6C7AABC92F783B98006496CE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6CA1AFFF2F8700000082CE23 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = exactVersion;
+				version = 1.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6CA1B0002F8700000082CE23 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6CA1AFFF2F8700000082CE23 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6C0990A72F2BE0C100D48100 /* Project object */;
+}
