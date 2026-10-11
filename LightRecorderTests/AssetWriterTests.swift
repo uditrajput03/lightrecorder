@@ -358,6 +358,29 @@ final class AssetWriterTests: XCTestCase {
         XCTAssertEqual(result.videoFrameCount, 1)
     }
 
+    func testStreamConfigurationEnforcesSRGBColorSpace() {
+        let settings = makeStore()
+        let engine = CaptureEngine()
+        let config = engine.createStreamConfiguration(
+            from: settings,
+            contentSize: videoSize
+        )
+
+        XCTAssertEqual(config.colorSpaceName, CGColorSpace.sRGB)
+        XCTAssertEqual(config.pixelFormat, kCVPixelFormatType_32BGRA)
+    }
+
+    func testVideoOutputSettingsMatchRec709ColorProperties() {
+        let settings = makeStore()
+        let videoSettings = AssetWriterSettings.video(from: settings, size: videoSize)
+
+        let colorProps = videoSettings[AVVideoColorPropertiesKey] as? [String: String]
+        XCTAssertNotNil(colorProps)
+        XCTAssertEqual(colorProps?[AVVideoColorPrimariesKey], AVVideoColorPrimaries_ITU_R_709_2)
+        XCTAssertEqual(colorProps?[AVVideoTransferFunctionKey], AVVideoTransferFunction_ITU_R_709_2)
+        XCTAssertEqual(colorProps?[AVVideoYCbCrMatrixKey], AVVideoYCbCrMatrix_ITU_R_709_2)
+    }
+
     // MARK: - Helpers
 
     private func isStrictlyIncreasing(_ times: [CMTime]) -> Bool {

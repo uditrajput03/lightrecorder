@@ -213,7 +213,7 @@ final class CaptureEngine: NSObject {
     ///   - sourceRect: Optional rectangle for area selection (display points, top-left origin)
     ///   - isWindowCapture: Whether the filter captures a single window
     ///   - capturesAudio: Whether this stream carries system audio, or a dedicated one does
-    private func createStreamConfiguration(
+    func createStreamConfiguration(
         from settings: SettingsStore,
         contentSize: CGSize,
         sourceRect: CGRect? = nil,
@@ -224,6 +224,10 @@ final class CaptureEngine: NSObject {
 
         // Standard 8-bit SDR pixel format (matches default screen recorders like Windows Snipping Tool)
         config.pixelFormat = kCVPixelFormatType_32BGRA
+
+        // Explicitly enforce standard sRGB color space so ScreenCaptureKit converts the display's
+        // wide gamut (Display P3) into sRGB, matching Rec. 709 SDR encoding and preventing dull colors.
+        config.colorSpaceName = CGColorSpace.sRGB
 
         // Set output dimensions - required for proper capture
         config.width = Int(contentSize.width)
