@@ -30,6 +30,14 @@ enum CaptureFilterStyle: Equatable {
 
     /// Classifies a content filter by what it captures rather than by its reported style.
     init(_ filter: SCContentFilter) {
-        self = .display
+        if let apps = (filter as NSObject).value(forKey: "includedApplications") as? [SCRunningApplication], !apps.isEmpty {
+            self = .application
+        } else if (filter as NSObject).value(forKey: "individualWindow") as? SCWindow != nil {
+            self = .window
+        } else if (filter as NSObject).value(forKey: "display") as? SCDisplay != nil {
+            self = .display
+        } else {
+            self = .display
+        }
     }
 }
