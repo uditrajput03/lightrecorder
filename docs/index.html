@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightRecorder</title>
+  <meta name="description" content="Minimal, open-source macOS screen recorder built with ScreenCaptureKit. Dual audio, HEVC/H.264, zero telemetry.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>LightRecorder</h1>
+      <button id="theme-btn" class="theme-btn">light</button>
+    </header>
+
+    <p class="lead">
+      Minimal, open-source macOS menu bar screen recorder. Built with ScreenCaptureKit and SwiftUI. Records screen and dual audio (system + microphone) locally without background telemetry, audio drivers, or accounts.
+    </p>
+
+    <div class="actions">
+      <a href="https://github.com/uditrajput03/lightrecorder/releases/latest" class="btn btn-primary">Download .dmg</a>
+      <a href="https://github.com/uditrajput03/lightrecorder" class="btn btn-outline" target="_blank" rel="noopener noreferrer">Source</a>
+    </div>
+
+    <hr>
+
+    <h2>Features</h2>
+    <ul>
+      <li>Full screen, drag-selected area, or single application window capture.</li>
+      <li>System audio and microphone recorded simultaneously into isolated tracks.</li>
+      <li>Hardware-accelerated HEVC (H.265) and H.264 in .mov or .mp4.</li>
+      <li>Resolution toggle: Native Retina or 1x logical downscaling.</li>
+      <li>Content filtering: exclude cursor, wallpaper, menu bar, dock, or window shadows.</li>
+      <li>Zero third-party audio drivers (no BlackHole / Soundflower).</li>
+      <li>Zero analytics, telemetry, or remote network calls. 100% local.</li>
+    </ul>
+
+    <h2>Automation</h2>
+    <p class="lead" style="font-size:0.9rem; margin-bottom:16px;">Trigger via <code>lightrecorder://</code> URL scheme from terminal, Raycast, or Shortcuts:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>lightrecorder://toggle</code></td>
+            <td>Toggles recording with current mode</td>
+          </tr>
+          <tr>
+            <td><code>lightrecorder://toggle-copy</code></td>
+            <td>Toggles and copies finalized file path to clipboard</td>
+          </tr>
+          <tr>
+            <td><code>lightrecorder://open-recordings</code></td>
+            <td>Opens output folder in Finder</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Requirements</h2>
+    <ul>
+      <li>macOS 13.0 (Ventura) or later</li>
+      <li>Screen Recording permission granted in System Settings</li>
+    </ul>
+
+    <footer>
+      <div>MIT License • <a href="https://github.com/uditrajput03/lightrecorder" target="_blank" rel="noopener noreferrer">GitHub</a></div>
+      <div><a href="privacy.html">Privacy</a></div>
+    </footer>
+  </div>
+
+  <div id="toast">copied</div>
+
+  <script src="app.js"></script>
+</body>
+</html>

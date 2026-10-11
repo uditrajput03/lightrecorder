@@ -1,5 +1,8 @@
 # LightRecorder
 
+[![Website](https://img.shields.io/badge/website-lightrecorder-blue)](https://uditrajput03.github.io/lightrecorder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 LightRecorder is an open-source macOS menu bar screen recording application built with SwiftUI and ScreenCaptureKit. It records screen video and audio locally without background telemetry, third-party audio drivers, or account requirements.
 
 ## Features
@@ -10,7 +13,7 @@ LightRecorder is an open-source macOS menu bar screen recording application buil
 - **Frame Rates**: 60 fps, 30 fps, 24 fps, or native display refresh rate.
 - **Resolution Control**: Native Retina pixel resolution or 1x logical resolution capture.
 - **Audio Capture**: Simultaneous recording of system audio and microphone inputs into separate audio tracks (AAC or uncompressed PCM in `.mov`).
-- **Content Filtering**: Exclude cursor, desktop wallpaper, menu bar, Dock, or LightRecorder itself from recordings. Window shadows can be toggled per capture.
+- **Content Filtering**: Exclude cursor, wallpaper, menu bar, Dock, or LightRecorder itself from recordings. Window shadows can be toggled per capture.
 - **Menu Bar Control**: Status item displaying an active recording timer with quick toggles for sources, inputs, and destination folder.
 - **Global Shortcuts**: System-wide configurable hotkeys for toggling recording, selecting an area, and opening the window picker.
 - **Local Storage**: Files save to `~/Movies/LightRecorder` by default or a user-selected security-scoped folder.
@@ -23,15 +26,7 @@ LightRecorder is an open-source macOS menu bar screen recording application buil
 
 ## Installation
 
-### Releases
-
 Download the latest `.dmg` from the [GitHub Releases](https://github.com/uditrajput03/lightrecorder/releases/latest) page and move `LightRecorder.app` into `/Applications`.
-
-### Homebrew
-
-```bash
-brew install lightrecorder
-```
 
 ## Capture Modes
 
