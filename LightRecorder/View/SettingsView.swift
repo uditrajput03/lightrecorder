@@ -82,9 +82,9 @@ struct VideoSettingsView: View {
     private var qualityHelpText: String {
         switch settings.videoCodec {
         case .hevc:
-            return "Bitrate presets: Low (~8 Mbps), Medium (~16 Mbps), High (~28 Mbps)"
+            return "Target bitrate scales with resolution and frame rate (BPP). Low: ~2.5-5 Mbps, Medium: ~18-35 Mbps, High: ~50-80 Mbps."
         case .h264:
-            return "Quality factor presets: Low (0.5), Medium (0.75), High (1.0)"
+            return "Target bitrate scales with resolution and frame rate (BPP). Low: ~5-10 Mbps, Medium: ~25-50 Mbps, High: ~75-120 Mbps."
         }
     }
 
@@ -93,6 +93,11 @@ struct VideoSettingsView: View {
         When enabled, captures at physical pixel resolution (2x on Retina displays).
         When disabled, captures at points resolution (1x).
         """
+    }
+
+    private var fragmentedRecordingHelpText: String {
+        "Writes periodic movie fragments so the recording survives unexpected app termination or power loss. " +
+        "May reduce compatibility with certain video editors."
     }
 
     var body: some View {
@@ -137,7 +142,7 @@ struct VideoSettingsView: View {
                     .help(captureNativeResHelpText)
 
                 Toggle("Crash-Resilient Recording (Fragmented MP4)", isOn: $settings.crashResilientRecording)
-                    .help("Writes periodic movie fragments so the recording survives unexpected app termination or power loss. May reduce compatibility with certain video editors.")
+                    .help(fragmentedRecordingHelpText)
             }
 
             Section("Display Elements") {

@@ -55,12 +55,45 @@ final class ContentFilterService {
     /// Checks whether the display targeted by a filter is still connected
     func isSelectedDisplayConnected(_ filter: SCContentFilter) async -> Bool {
         guard let content = try? await SCShareableContent.current else { return true }
+        if let display = (filter as NSObject).value(forKey: "display") as? SCDisplay {
+            return content.displays.contains(where: { $0.displayID == display.displayID })
+        }
         return !content.displays.isEmpty
     }
 
     /// Applies user settings to a content filter
     func applySettings(to filter: SCContentFilter, settings: SettingsStore) async throws -> SCContentFilter {
-        filter
+        let visibility = ContentVisibility(settings: settings)
+        guard ContentFilterRules.requiresRebuild(visibility: visibility) else {
+            return filter
+        }
+
+        guard let content = try? await SCShareableContent.current else {
+            return filter
+        }
+
+        let capturableWindows = content.windows.map(CapturableWindow.init)
+        let excludedIDs = Set(ContentFilterRules.excludedWindowIDs(from: capturableWindows, visibility: visibility))
+        let windowsToExclude = content.windows.filter { excludedIDs.contains($0.windowID) }
+
+        // Retrieve display from filter or fallback to primary display
+        let display = (filter as NSObject).value(forKey: "display") as? SCDisplay ?? content.displays.first
+
+        guard let targetDisplay = display else {
+            return filter
+        }
+
+        // Also merge any existing excluded windows
+        let existingExcluded = (filter as NSObject).value(forKey: "excludedWindows") as? [SCWindow] ?? []
+        var combinedExcluded = windowsToExclude
+        for window in existingExcluded where !combinedExcluded.contains(where: { $0.windowID == window.windowID }) {
+            combinedExcluded.append(window)
+        }
+
+        let filterSummary = "wallpaper: \(visibility.showWallpaper), dock: \(visibility.showDock), lightRecorder: \(visibility.showLightRecorder)"
+        logger.info("Applying content filter: excluding \(combinedExcluded.count) window(s) (\(filterSummary))")
+
+        return SCContentFilter(display: targetDisplay, excludingWindows: combinedExcluded)
     }
 }
 

@@ -27,6 +27,7 @@ final class RecorderViewModelTests: XCTestCase {
     func testInitialStateIsIdle() {
         let viewModel = RecorderViewModel()
         XCTAssertFalse(viewModel.isRecording)
+        XCTAssertFalse(viewModel.isCountingDown)
     }
 
     func testCannotStartRecordingWithoutContentFilter() {
@@ -38,6 +39,17 @@ final class RecorderViewModelTests: XCTestCase {
 
         let viewModel = RecorderViewModel()
         XCTAssertFalse(viewModel.canStartRecording)
+    }
+
+    func testCanStartRecordingWhenFullScreenMode() {
+        let saved = UserDefaults.standard.string(forKey: ContentSelectionMode.storageKey)
+        defer {
+            UserDefaults.standard.set(saved, forKey: ContentSelectionMode.storageKey)
+        }
+        UserDefaults.standard.set(ContentSelectionMode.fullScreen.rawValue, forKey: ContentSelectionMode.storageKey)
+
+        let viewModel = RecorderViewModel()
+        XCTAssertTrue(viewModel.canStartRecording)
     }
 
     func testHasNoContentSelectedByDefault() {
@@ -58,5 +70,28 @@ final class RecorderViewModelTests: XCTestCase {
     func testRecordingDurationIsZeroByDefault() {
         let viewModel = RecorderViewModel()
         XCTAssertEqual(viewModel.recordingDuration, 0)
+    }
+
+    func testCancelCountdownWhenNotCountingDownIsSafe() {
+        let viewModel = RecorderViewModel()
+        viewModel.cancelCountdown()
+        XCTAssertFalse(viewModel.isCountingDown)
+        XCTAssertFalse(viewModel.isRecording)
+    }
+
+    func testCaptureFilterStyleEquatable() {
+        XCTAssertEqual(CaptureFilterStyle.display, CaptureFilterStyle.display)
+        XCTAssertEqual(CaptureFilterStyle.application, CaptureFilterStyle.application)
+        XCTAssertEqual(CaptureFilterStyle.window, CaptureFilterStyle.window)
+        XCTAssertEqual(CaptureFilterStyle.unknown, CaptureFilterStyle.unknown)
+        XCTAssertNotEqual(CaptureFilterStyle.display, CaptureFilterStyle.application)
+        XCTAssertNotEqual(CaptureFilterStyle.window, CaptureFilterStyle.display)
+    }
+
+    func testAudioDeviceServiceLoadsDevicesWithoutCrashing() {
+        let service = AudioDeviceService()
+        XCTAssertNotNil(service.availableDevices)
+        service.refreshDevices()
+        XCTAssertNotNil(service.availableDevices)
     }
 }

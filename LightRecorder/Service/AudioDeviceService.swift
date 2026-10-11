@@ -7,6 +7,7 @@
 
 import AVFoundation
 import OSLog
+import Combine
 
 /// Represents an audio input device
 struct AudioInputDevice: Identifiable, Hashable {
@@ -14,8 +15,6 @@ struct AudioInputDevice: Identifiable, Hashable {
     let name: String
     let isDefault: Bool
 }
-
-import Combine
 
 /// Service for enumerating and monitoring available microphone devices
 @MainActor
@@ -25,6 +24,7 @@ final class AudioDeviceService: ObservableObject {
 
     private var hasLoadedDevices = false
     @Published private var _availableDevices: [AudioInputDevice] = []
+    private var notificationObservers: [NSObjectProtocol] = []
 
     var availableDevices: [AudioInputDevice] {
         if !hasLoadedDevices {
@@ -45,6 +45,12 @@ final class AudioDeviceService: ObservableObject {
         setupNotifications()
         hasLoadedDevices = true
         loadDevices()
+    }
+
+    deinit {
+        for observer in notificationObservers {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     // MARK: - Public Methods
@@ -80,7 +86,7 @@ final class AudioDeviceService: ObservableObject {
     // MARK: - Private Methods
 
     private func setupNotifications() {
-        NotificationCenter.default.addObserver(
+        let connectedObserver = NotificationCenter.default.addObserver(
             forName: .AVCaptureDeviceWasConnected,
             object: nil,
             queue: .main
@@ -90,8 +96,9 @@ final class AudioDeviceService: ObservableObject {
                 self?.logger.info("Audio device connected")
             }
         }
+        notificationObservers.append(connectedObserver)
 
-        NotificationCenter.default.addObserver(
+        let disconnectedObserver = NotificationCenter.default.addObserver(
             forName: .AVCaptureDeviceWasDisconnected,
             object: nil,
             queue: .main
@@ -101,5 +108,6 @@ final class AudioDeviceService: ObservableObject {
                 self?.logger.info("Audio device disconnected")
             }
         }
+        notificationObservers.append(disconnectedObserver)
     }
 }
