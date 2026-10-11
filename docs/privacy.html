@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — LightRecorder</title>
+  <meta name="description" content="LightRecorder privacy policy: Zero telemetry, 100% local recording, no user data collection or tracking.">
+  <meta name="author" content="Udit Rajput">
+  <link rel="canonical" href="https://uditrajput03.github.io/lightrecorder/privacy.html">
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <meta name="theme-color" content="#0071e3">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .privacy-article {
+      max-width: 800px;
+      margin: 60px auto 100px auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 48px;
+      box-shadow: var(--shadow-sm);
+    }
+    .privacy-article h1 {
+      font-size: 2.4rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .privacy-meta {
+      color: var(--text-tertiary);
+      font-size: 0.9rem;
+      margin-bottom: 36px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .privacy-section {
+      margin-bottom: 32px;
+    }
+    .privacy-section h2 {
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .privacy-section p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .privacy-section ul {
+      color: var(--text-secondary);
+      margin-left: 20px;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand" aria-label="LightRecorder Home">
+        <div class="brand-icon">
+          <svg viewBox="0 0 1024 1024" fill="none">
+            <circle cx="512" cy="512" r="320" stroke="white" stroke-width="60"/>
+            <circle cx="512" cy="512" r="189" fill="white"/>
+          </svg>
+        </div>
+        <span>LightRecorder</span>
+      </a>
+
+      <div class="nav-actions">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+          <svg id="sun-icon" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <a href="index.html" class="btn-secondary">Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <article class="privacy-article">
+      <h1>Privacy Policy</h1>
+      <div class="privacy-meta">Last updated: October 2026 • Effective immediately</div>
+
+      <div class="privacy-section">
+        <h2>1. Commitment to Privacy</h2>
+        <p>LightRecorder was created with a fundamental principle: <strong>your screen, your audio, and your recordings are entirely yours</strong>. The application does not collect, monitor, log, or transmit any user data or recordings.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>2. Zero Data Collection</h2>
+        <p>When you use LightRecorder:</p>
+        <ul>
+          <li><strong>No Personal Information:</strong> We do not ask for, collect, or store names, emails, IP addresses, or device identifiers.</li>
+          <li><strong>No Telemetry or Analytics:</strong> There are no analytics frameworks (Google Analytics, Mixpanel, Firebase, TelemetryDeck, etc.) compiled into LightRecorder.</li>
+          <li><strong>No Cloud Uploads:</strong> Recorded video and audio streams are processed locally via Apple ScreenCaptureKit and AVFoundation, written straight to your local disk, and never sent across the internet.</li>
+          <li><strong>No Accounts Required:</strong> The app does not feature user accounts, logins, or cloud synchronization.</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <h2>3. System Permissions</h2>
+        <p>LightRecorder requires specific macOS permissions to function as intended:</p>
+        <ul>
+          <li><strong>Screen Recording Permission:</strong> Required by macOS to access ScreenCaptureKit APIs to capture displays, selected areas, or window buffers.</li>
+          <li><strong>Microphone Permission (Optional):</strong> Required only if you choose to record your voice commentary alongside system audio.</li>
+          <li><strong>Folder Access:</strong> LightRecorder requests access to save recordings into your designated local folder (defaulting to <code>~/Movies/LightRecorder</code>) via security-scoped bookmarks.</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <h2>4. Open Source Verification</h2>
+        <p>LightRecorder is distributed under the open-source MIT License. You do not need to take our word for it—every single line of code is publicly auditable on our <a href="https://github.com/uditrajput03/lightrecorder" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;">GitHub repository</a>.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>5. Contact</h2>
+        <p>If you have any questions or security concerns regarding this privacy policy, feel free to open a discussion or issue on our GitHub repository.</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <div>Released under the MIT License • LightRecorder</div>
+      <div><a href="index.html" style="color:var(--accent);">Return to Home</a></div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

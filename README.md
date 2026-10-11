@@ -1,5 +1,8 @@
 # LightRecorder
 
+[![Website](https://img.shields.io/badge/website-lightrecorder-blue)](https://uditrajput03.github.io/lightrecorder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 LightRecorder is an open-source macOS menu bar screen recording application built with SwiftUI and ScreenCaptureKit. It records screen video and audio locally without background telemetry, third-party audio drivers, or account requirements.
 
 ## Features

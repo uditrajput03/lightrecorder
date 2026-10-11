@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightRecorder — Lightweight, Native macOS Screen Recorder</title>
+  <meta name="description" content="Free, open-source macOS menu bar screen recorder built with SwiftUI & ScreenCaptureKit. Record system audio and mic simultaneously, HEVC/H.264, zero telemetry, no drivers required.">
+  <meta name="keywords" content="screen recorder mac, macos screen recording, ScreenCaptureKit, free mac screen recorder, open source screen recorder, record mac system audio, quicktime alternative, hevc screen recorder, lightrecorder">
+  <meta name="author" content="Udit Rajput">
+  <link rel="canonical" href="https://uditrajput03.github.io/lightrecorder/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://uditrajput03.github.io/lightrecorder/">
+  <meta property="og:title" content="LightRecorder — Lightweight, Native macOS Screen Recorder">
+  <meta property="og:description" content="Screen video & dual audio recording locally on macOS without background telemetry, third-party audio drivers, or subscriptions.">
+  <meta property="og:image" content="assets/lightrecorder-og.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LightRecorder — Lightweight, Native macOS Screen Recorder">
+  <meta name="twitter:description" content="Screen video & dual audio recording locally on macOS without background telemetry, third-party audio drivers, or subscriptions.">
+  <meta name="twitter:image" content="assets/lightrecorder-og.png">
+
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <meta name="theme-color" content="#0071e3">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "LightRecorder",
+        "operatingSystem": "macOS 13.0 or later",
+        "applicationCategory": "MultimediaApplication",
+        "description": "An open-source macOS menu bar screen recording application built with SwiftUI and ScreenCaptureKit. Records system audio and microphone simultaneously without external audio drivers.",
+        "url": "https://uditrajput03.github.io/lightrecorder/",
+        "downloadUrl": "https://github.com/uditrajput03/lightrecorder/releases/latest",
+        "license": "https://opensource.org/licenses/MIT",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is LightRecorder really free and open source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. LightRecorder is 100% free and open-source under the MIT license. There are no subscriptions, in-app purchases, ads, or watermarks."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can LightRecorder record system audio without installing audio drivers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. LightRecorder leverages Apple ScreenCaptureKit system audio tap capabilities directly in macOS 13+. You do not need BlackHole, Soundflower, or any third-party kexts or virtual audio plugins."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does LightRecorder collect any background telemetry or analytics?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "None whatsoever. LightRecorder runs 100% locally on your Mac with zero telemetry, zero trackers, and no external server requests."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="#" class="brand" aria-label="LightRecorder Home">
+        <div class="brand-icon">
+          <svg viewBox="0 0 1024 1024" fill="none">
+            <circle cx="512" cy="512" r="320" stroke="white" stroke-width="60"/>
+            <circle cx="512" cy="512" r="189" fill="white"/>
+          </svg>
+        </div>
+        <span>LightRecorder</span>
+        <span class="brand-badge">v1.0 • macOS 13+</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#modes" class="nav-link">Capture Modes</a></li>
+        <li><a href="#automation" class="nav-link">Automation</a></li>
+        <li><a href="#specs" class="nav-link">Specs</a></li>
+        <li><a href="#faq" class="nav-link">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+          <svg id="sun-icon" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <a href="https://github.com/uditrajput03/lightrecorder" target="_blank" rel="noopener noreferrer" class="github-btn" title="View Source on GitHub" aria-label="GitHub Repository">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+        </a>
+
+        <a href="https://github.com/uditrajput03/lightrecorder/releases/latest" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Download</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <span class="hero-pill-badge">Open Source</span>
+        <span>Built with SwiftUI & ScreenCaptureKit • Zero Telemetry</span>
+      </div>
+
+      <h1 class="hero-title">
+        The macOS Screen Recorder <span class="gradient-text">Built for Performance.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Lightweight, native, and 100% private. Record full screen, custom regions, or single apps with dual audio streams (system & mic), HEVC/H.264 compression, and zero third-party audio drivers.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="https://github.com/uditrajput03/lightrecorder/releases/latest" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Download .DMG</span>
+        </a>
+
+        <div class="hero-terminal-pill">
+          <code>brew install lightrecorder</code>
+          <button class="copy-btn" data-copy="brew install lightrecorder" title="Copy command" aria-label="Copy brew install command">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+
+        <a href="https://github.com/uditrajput03/lightrecorder" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+          <span>View on GitHub</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+      </div>
+
+      <div class="hero-stats-row">
+        <div class="hero-stat-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Native ScreenCaptureKit</span>
+        </div>
+        <div class="hero-stat-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Simultaneous System + Mic Audio</span>
+        </div>
+        <div class="hero-stat-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Zero Telemetry & 100% Local</span>
+        </div>
+        <div class="hero-stat-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>No Kernel Audio Extensions</span>
+        </div>
+      </div>
+
+      <!-- Interactive macOS Menu Bar & HUD Simulator -->
+      <div class="interactive-showcase-container">
+        <div class="macos-window-frame">
+          <!-- macOS Simulated Menu Bar -->
+          <div class="simulated-menu-bar">
+            <div class="simulated-menu-left">
+              <svg class="apple-logo" viewBox="0 0 170 170">
+                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.65-7.79-11.86-14.25-6.52-10.02-11.38-21.5-14.58-34.43-3.2-12.94-4.81-24.81-4.81-35.63 0-14.04 3.42-25.7 10.26-34.99 6.84-9.29 15.68-14.07 26.52-14.34 5.34 0 11.16 1.48 17.46 4.45 6.3 2.97 10.24 4.51 11.83 4.62 1.41 0 5.49-1.61 12.24-4.82 6.75-3.21 12.63-4.63 17.65-4.26 13.9.87 24.57 5.73 32.02 14.59-11.75 7.12-17.51 16.92-17.29 29.41.22 9.8 4.04 18.06 11.46 24.78 7.42 6.72 16.14 10.36 26.17 10.93-2.39 7.64-5.44 15.17-9.16 22.58zM119.22 31.84c0-7.39 2.7-14.24 8.11-20.55 5.4-6.31 11.96-10.3 19.67-11.97 1.08 7.61-1.39 14.93-7.41 21.96-6.02 7.03-12.81 10.74-20.37 11.14v-.58z"/>
+              </svg>
+              <span class="simulated-menu-item active">Finder</span>
+              <span class="simulated-menu-item">File</span>
+              <span class="simulated-menu-item">Edit</span>
+              <span class="simulated-menu-item">View</span>
+              <span class="simulated-menu-item">Window</span>
+              <span class="simulated-menu-item">Help</span>
+            </div>
+
+            <div class="simulated-menu-right">
+              <!-- LightRecorder Status Bar Item -->
+              <div class="sim-menu-status-item" id="sim-status-item" title="Click to test recording toggle">
+                <span class="sim-rec-dot" id="sim-rec-dot"></span>
+                <span id="sim-status-timer">Ready</span>
+              </div>
+              <span class="simulated-menu-item">Tue Oct 11</span>
+              <span class="simulated-menu-item">22:17</span>
+            </div>
+          </div>
+
+          <!-- Desktop Stage with HUD Popover -->
+          <div class="simulated-desktop-stage">
+            <div class="sim-selection-box" id="sim-selection-box">
+              <span class="sim-selection-badge">1280 × 720 • Selected Area</span>
+            </div>
+
+            <div class="hud-popover">
+              <div class="hud-header">
+                <div class="hud-title-wrap">
+                  <div class="hud-icon">
+                    <svg width="16" height="16" viewBox="0 0 1024 1024" fill="none">
+                      <circle cx="512" cy="512" r="320" stroke="white" stroke-width="60"/>
+                      <circle cx="512" cy="512" r="189" fill="white"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3>LightRecorder</h3>
+                  </div>
+                </div>
+                <div class="hud-timer-badge" id="sim-hud-timer">00:00:00</div>
+              </div>
+
+              <!-- Mode Segmented Buttons -->
+              <div class="hud-modes-segment">
+                <button class="hud-mode-btn active" data-sim-mode="fullscreen">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <span>Display</span>
+                </button>
+                <button class="hud-mode-btn" data-sim-mode="area">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v4M18 2v4M2 6h4M2 18h4M18 22v-4M6 22v-4M22 6h-4M22 18h-4"/></svg>
+                  <span>Select Area</span>
+                </button>
+                <button class="hud-mode-btn" data-sim-mode="window">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                  <span>App Window</span>
+                </button>
+              </div>
+
+              <!-- Quick Toggles -->
+              <div class="hud-toggles-grid">
+                <div class="hud-toggle-row">
+                  <div class="hud-toggle-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    <span>System Audio</span>
+                  </div>
+                  <div class="hud-switch on" title="Toggle System Audio"></div>
+                </div>
+
+                <div class="hud-toggle-row">
+                  <div class="hud-toggle-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    <span>Microphone Input</span>
+                  </div>
+                  <div class="hud-switch on" title="Toggle Microphone"></div>
+                </div>
+
+                <div class="hud-toggle-row">
+                  <div class="hud-toggle-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+                    <span>Exclude Mouse Cursor</span>
+                  </div>
+                  <div class="hud-switch" title="Toggle Cursor"></div>
+                </div>
+              </div>
+
+              <!-- Metadata Preset -->
+              <div class="hud-meta-row">
+                <span>Output Format:</span>
+                <span class="hud-meta-pill">HEVC (H.265) • 60 FPS • High Bitrate</span>
+              </div>
+
+              <!-- Action Record Button -->
+              <button class="hud-action-btn" id="sim-record-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="8"/>
+                </svg>
+                <span>Start Recording</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Key Features Grid -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Why LightRecorder</span>
+        <h2>High Performance Screen Capture, Without Compromise</h2>
+        <p>Engineered from the ground up for modern macOS versions, prioritizing ultra-low latency, crisp image quality, and total user privacy.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h3>ScreenCaptureKit Engine</h3>
+          <p>Direct integration with Apple ScreenCaptureKit framework ensures low CPU usage and zero frame stutter even at 4K 60fps.</p>
+          <ul class="feature-bullets">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Hardware-accelerated encoding</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Native Retina & 1x logical modes</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+          <h3>Dual Track Audio</h3>
+          <p>Captures crisp system audio and microphone input simultaneously into independent audio tracks for seamless post-production editing.</p>
+          <ul class="feature-bullets">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>No BlackHole or Soundflower required</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>High-fidelity AAC or uncompressed PCM</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+          </div>
+          <h3>Smart Content Filter</h3>
+          <p>Keep your recordings uncluttered. Automatically exclude cursor pointers, desktop wallpapers, menu bars, and docks.</p>
+          <ul class="feature-bullets">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Exclude LightRecorder itself from video</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Per-window drop shadow toggling</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+          </div>
+          <h3>Zero Bloat, Pure Swift</h3>
+          <p>No heavy Chromium shells, no Node.js runtimes, and no bloated background daemons. Lives quietly in your menu bar until needed.</p>
+          <ul class="feature-bullets">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Minimal memory consumption (&lt;30MB idle)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Instant startup in under a second</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+          </div>
+          <h3>URL Scheme Automation</h3>
+          <p>Trigger recordings effortlessly from Raycast, Alfred, Apple Shortcuts, or shell scripts via custom <code>lightrecorder://</code> deep links.</p>
+          <ul class="feature-bullets">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><code>toggle-copy</code> copies path straight to clipboard</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>System-wide customizable hotkeys</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3>Privacy-First & Open Source</h3>
+          <p>All videos are written directly to your local storage. No accounts, no sign-ins, no cloud telemetry, and zero surveillance.</p>
+          <ul class="feature-bullets">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Permissive MIT License</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Security-scoped local folder protection</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Capture Modes Showcase -->
+  <section class="modes-section" id="modes">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Flexible Capture</span>
+        <h2>Choose Exactly What You Want to Record</h2>
+        <p>Whether you need an entire multi-display setup, a sharp cropped UI element, or a clean single app window.</p>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="modes-tabs-wrapper">
+        <div class="modes-tabs">
+          <button class="modes-tab-btn active" data-mode-tab="fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>Full Screen</span>
+          </button>
+          <button class="modes-tab-btn" data-mode-tab="area">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v4M18 2v4M2 6h4M2 18h4M18 22v-4M6 22v-4M22 6h-4M22 18h-4"/></svg>
+            <span>Select Area</span>
+          </button>
+          <button class="modes-tab-btn" data-mode-tab="window">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            <span>Window / App</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel: Full Screen -->
+      <div class="mode-content-panel active" id="panel-fullscreen">
+        <div class="mode-info-col">
+          <h3>Full Display Recording</h3>
+          <p>Target any display attached to your Mac at its native Retina pixel resolution or downscaled 1x logical resolution for smaller file sizes.</p>
+          <div class="mode-details-list">
+            <div class="mode-detail-item">
+              <div class="mode-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="mode-detail-text">
+                <strong>Multi-Monitor Ready</strong>
+                <span>Easily switch between internal Retina displays and external Pro Display XDR or 4K monitors.</span>
+              </div>
+            </div>
+            <div class="mode-detail-item">
+              <div class="mode-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="mode-detail-text">
+                <strong>Configurable Frame Rates</strong>
+                <span>Lock to 60 fps, 30 fps, 24 fps, or allow variable display refresh capture.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mode-preview-col">
+          <div class="mode-preview-card">
+            <img src="assets/screenshot-basic.png" alt="LightRecorder Full Screen Capture Settings" loading="lazy">
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Select Area -->
+      <div class="mode-content-panel" id="panel-area">
+        <div class="mode-info-col">
+          <h3>Interactive Drag-Selection Area</h3>
+          <p>Drag an interactive marquee over any portion of your desktop. Snaps coordinates cleanly with live pixel dimension indicators.</p>
+          <div class="mode-details-list">
+            <div class="mode-detail-item">
+              <div class="mode-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="mode-detail-text">
+                <strong>Draggable & Resizable Handles</strong>
+                <span>Fine-tune the crop dimensions before recording starts with visual handle controls.</span>
+              </div>
+            </div>
+            <div class="mode-detail-item">
+              <div class="mode-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="mode-detail-text">
+                <strong>Pixel-Aligned Cropping</strong>
+                <span>Even-pixel dimension rounding ensures zero codec compression artifacts or green borders.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mode-preview-col">
+          <div class="mode-preview-card">
+            <img src="assets/screenshot-content-filter.png" alt="LightRecorder Content Filter and Area Crop Preview" loading="lazy">
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Window / App -->
+      <div class="mode-content-panel" id="panel-window">
+        <div class="mode-info-col">
+          <h3>Single Application / Window Isolation</h3>
+          <p>Use the macOS Content Sharing Picker to target an individual application window or process canvas without showing your desktop.</p>
+          <div class="mode-details-list">
+            <div class="mode-detail-item">
+              <div class="mode-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="mode-detail-text">
+                <strong>No Desktop Clutter</strong>
+                <span>Keeps other desktop notifications and background windows completely invisible.</span>
+              </div>
+            </div>
+            <div class="mode-detail-item">
+              <div class="mode-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="mode-detail-text">
+                <strong>Automatic Window Tracking</strong>
+                <span>ScreenCaptureKit smoothly tracks window movement across your screen canvas.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mode-preview-col">
+          <div class="mode-preview-card">
+            <img src="assets/screenshot-frame-rate.png" alt="LightRecorder Window and Frame Rate Preferences" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- URL Scheme Automation Section -->
+  <section class="automation-section" id="automation">
+    <div class="container">
+      <div class="automation-container">
+        <div class="automation-info">
+          <span class="section-badge">Developer & Power Users</span>
+          <h2>Automate Capture with URL Schemes</h2>
+          <p>LightRecorder implements the <code>lightrecorder://</code> URL scheme, allowing seamless integration with Raycast extensions, Alfred workflows, Apple Shortcuts, and terminal scripts.</p>
+
+          <div class="url-scheme-list">
+            <div class="url-scheme-card">
+              <div class="url-scheme-data">
+                <code>lightrecorder://toggle</code>
+                <span>Toggles recording immediately using active capture mode.</span>
+              </div>
+              <button class="copy-mini-btn" data-copy="lightrecorder://toggle" title="Copy URL">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+
+            <div class="url-scheme-card">
+              <div class="url-scheme-data">
+                <code>lightrecorder://toggle-copy</code>
+                <span>Toggles recording and copies the resulting file path to your clipboard upon completion.</span>
+              </div>
+              <button class="copy-mini-btn" data-copy="lightrecorder://toggle-copy" title="Copy URL">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+
+            <div class="url-scheme-card">
+              <div class="url-scheme-data">
+                <code>lightrecorder://open-recordings</code>
+                <span>Reveals the configured recording destination folder in Finder.</span>
+              </div>
+              <button class="copy-mini-btn" data-copy="lightrecorder://open-recordings" title="Copy URL">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automation Shell Box -->
+        <div class="automation-code-card">
+          <div class="code-card-header">
+            <div class="code-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="code-title">Terminal & Raycast Integration</div>
+            <button class="copy-mini-btn" data-copy='open "lightrecorder://toggle-copy"' title="Copy script">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy</span>
+            </button>
+          </div>
+          <pre class="code-body"><code><span class="comment"># 1. Start or stop recording from terminal</span>
+<span class="cmd">open</span> <span class="str">"lightrecorder://toggle"</span>
+
+<span class="comment"># 2. Stop and copy finalized file path to clipboard</span>
+<span class="cmd">open</span> <span class="str">"lightrecorder://toggle-copy"</span>
+
+<span class="comment"># 3. Reveal output folder in Finder</span>
+<span class="cmd">open</span> <span class="str">"lightrecorder://open-recordings"</span>
+
+<span class="comment"># 4. Integrate into Raycast Script Command:</span>
+<span class="comment"># @raycast.schemaVersion 1</span>
+<span class="comment"># @raycast.title Record Screen</span>
+<span class="comment"># @raycast.mode silent</span>
+<span class="cmd">open</span> <span class="str">"lightrecorder://toggle"</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Specifications & Comparison -->
+  <section class="comparison-section" id="specs">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Comparison & Specs</span>
+        <h2>How LightRecorder Compares</h2>
+        <p>A native alternative to bloated Electron screen capture tools and complicated virtual audio drivers.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="highlight-col">LightRecorder</th>
+              <th>QuickTime Player</th>
+              <th>OBS Studio</th>
+              <th>Cloud Recorders (Loom)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Internal System Audio</strong></td>
+              <td class="highlight-col"><span class="badge-green">✓ Built-in (ScreenCaptureKit)</span></td>
+              <td><span class="badge-dim">✗ Needs Soundflower/BlackHole</span></td>
+              <td><span class="badge-green">✓ macOS Screen Audio plugin</span></td>
+              <td><span class="badge-green">✓ In-app driver</span></td>
+            </tr>
+            <tr>
+              <td><strong>Simultaneous Microphone</strong></td>
+              <td class="highlight-col"><span class="badge-green">✓ Separate isolated track</span></td>
+              <td><span class="badge-dim">✗ Single source only</span></td>
+              <td><span class="badge-green">✓ Multi-track</span></td>
+              <td><span class="badge-dim">✗ Mixed single track</span></td>
+            </tr>
+            <tr>
+              <td><strong>Privacy & Zero Telemetry</strong></td>
+              <td class="highlight-col"><span class="badge-green">✓ 100% Local, 0 Analytics</span></td>
+              <td><span class="badge-green">✓ Local</span></td>
+              <td><span class="badge-green">✓ Local</span></td>
+              <td><span class="badge-dim">✗ Cloud uploads & tracking</span></td>
+            </tr>
+            <tr>
+              <td><strong>Resource Footprint</strong></td>
+              <td class="highlight-col"><span class="badge-green">Ultra-light (&lt;30MB RAM)</span></td>
+              <td>Low (~60MB RAM)</td>
+              <td>Heavy (~300MB+ RAM)</td>
+              <td>Heavy Electron (&gt;500MB RAM)</td>
+            </tr>
+            <tr>
+              <td><strong>URL Scheme Automation</strong></td>
+              <td class="highlight-col"><span class="badge-green">✓ <code>lightrecorder://</code></span></td>
+              <td><span class="badge-dim">✗ Limited AppleScript</span></td>
+              <td><span class="badge-dim">✗ Websocket RPC only</span></td>
+              <td><span class="badge-dim">✗ None</span></td>
+            </tr>
+            <tr>
+              <td><strong>Pricing & License</strong></td>
+              <td class="highlight-col"><span class="badge-green">Free & Open Source (MIT)</span></td>
+              <td>Bundled with macOS</td>
+              <td>Free (GPL)</td>
+              <td><span class="badge-dim">Subscription ($12.50+/mo)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">FAQ</span>
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know about LightRecorder's features, permissions, and system architecture.</p>
+      </div>
+
+      <div class="faq-accordion">
+        <details class="faq-item" open>
+          <summary class="faq-summary">
+            <span>Is LightRecorder completely free?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-content">
+            Yes, LightRecorder is 100% free and open source under the MIT License. There are no paid tiers, trials, accounts, telemetry, or watermarks.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span>How does LightRecorder record system audio without extra plugins?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-content">
+            LightRecorder utilizes Apple's ScreenCaptureKit framework introduced in macOS 12.3 and matured in macOS 13+. ScreenCaptureKit natively provides access to system audio buffers without requiring virtual audio loopbacks or third-party kernel drivers.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span>Where are recording files saved?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-content">
+            By default, all finalized video files are saved to <code>~/Movies/LightRecorder</code>. You can change this to any folder on your Mac in the LightRecorder Settings. LightRecorder maintains a security-scoped bookmark to retain access across system restarts.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span>What video formats and codecs are supported?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-content">
+            LightRecorder supports HEVC (H.265) and H.264 video compression, stored in either <code>.mov</code> or <code>.mp4</code> containers. High, Medium, and Low bitrate presets automatically scale bits-per-pixel to match your display resolution.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span>What permissions does LightRecorder require?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-content">
+            macOS requires granting <strong>Screen Recording</strong> permissions in <em>System Settings → Privacy &amp; Security → Screen Recording</em>. If you wish to capture your voice alongside system audio, microphone permissions will be prompted upon activation.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card">
+        <h2>Ready for Cleaner, Faster Screen Recording?</h2>
+        <p>Install LightRecorder today. No accounts, no subscriptions, and your data never leaves your Mac.</p>
+
+        <div class="cta-actions">
+          <a href="https://github.com/uditrajput03/lightrecorder/releases/latest" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download for macOS</span>
+          </a>
+
+          <div class="hero-terminal-pill">
+            <code>brew install lightrecorder</code>
+            <button class="copy-btn" data-copy="brew install lightrecorder" title="Copy command" aria-label="Copy brew install command">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="cta-subtext">Requires macOS 13.0 (Ventura) or later • Apple Silicon &amp; Intel compatible</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand-info">
+          <div class="brand">
+            <div class="brand-icon">
+              <svg viewBox="0 0 1024 1024" fill="none">
+                <circle cx="512" cy="512" r="320" stroke="white" stroke-width="60"/>
+                <circle cx="512" cy="512" r="189" fill="white"/>
+              </svg>
+            </div>
+            <span>LightRecorder</span>
+          </div>
+          <p>An open-source macOS menu bar screen recording application built with SwiftUI and ScreenCaptureKit.</p>
+        </div>
+
+        <div class="footer-nav-groups">
+          <div class="footer-col">
+            <h4>Application</h4>
+            <ul>
+              <li><a href="https://github.com/uditrajput03/lightrecorder/releases/latest">Releases (.dmg)</a></li>
+              <li><a href="#modes">Capture Modes</a></li>
+              <li><a href="#automation">URL Schemes</a></li>
+              <li><a href="#specs">Specifications</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Open Source</h4>
+            <ul>
+              <li><a href="https://github.com/uditrajput03/lightrecorder" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+              <li><a href="https://github.com/uditrajput03/lightrecorder/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contributing Guide</a></li>
+              <li><a href="https://github.com/uditrajput03/lightrecorder/issues" target="_blank" rel="noopener noreferrer">Issue Tracker</a></li>
+              <li><a href="https://github.com/uditrajput03/lightrecorder/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Privacy</h4>
+            <ul>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="#faq">Permissions FAQ</a></li>
+              <li><a href="https://github.com/uditrajput03/lightrecorder/discussions" target="_blank" rel="noopener noreferrer">Discussions</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>Released under the MIT License. Built with ❤️ for the macOS developer & creator community.</div>
+        <div>Zero Telemetry • 100% Local</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toast-text">Copied to clipboard!</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
