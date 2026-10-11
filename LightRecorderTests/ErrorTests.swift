@@ -68,4 +68,10 @@ final class ErrorTests: XCTestCase {
         let error = CaptureError.microphonePermissionDenied
         XCTAssertTrue(error.errorDescription?.localizedStandardContains("permission") == true)
     }
+
+    func testCaptureErrorSelectedDisplayDisconnectedMentionsDisplay() {
+        let error = CaptureError.selectedDisplayDisconnected
+        XCTAssertTrue(error.errorDescription?.localizedStandardContains("display") == true)
+        XCTAssertTrue(error.errorDescription?.localizedStandardContains("connected") == true)
+    }
 }

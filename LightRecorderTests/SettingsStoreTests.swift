@@ -263,6 +263,17 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertFalse(store.captureNativeResolution)
     }
 
+    func testSelectedMicrophoneIDPersists() {
+        let store = makeStore()
+        XCTAssertNil(store.selectedMicrophoneID)
+
+        store.selectedMicrophoneID = "custom-mic-device-123"
+        XCTAssertEqual(store.selectedMicrophoneID, "custom-mic-device-123")
+
+        store.selectedMicrophoneID = nil
+        XCTAssertNil(store.selectedMicrophoneID)
+    }
+
     // MARK: - Complex Cascade Scenarios
 
     func testSwitchingContainerToMP4CascadesAudioCodec() {
