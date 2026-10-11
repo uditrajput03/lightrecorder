@@ -119,7 +119,7 @@ final class CaptureEngine: NSObject {
 
         if settings.captureMicrophone {
             let box = self.delegateBox
-            try microphoneSession.start(deviceID: settings.selectedMicrophoneID) { [weak self] sampleBuffer in
+            try await microphoneSession.start(deviceID: settings.selectedMicrophoneID) { [weak self] sampleBuffer in
                 guard let self else { return }
                 box.delegate?.captureEngine(self, didOutputMicrophoneSampleBuffer: sampleBuffer)
             }
@@ -128,13 +128,15 @@ final class CaptureEngine: NSObject {
 
         logger.info("Stream config - capturesAudio: \(settings.captureSystemAudio), captureMicrophone: \(settings.captureMicrophone)")
         logger.info("Starting stream capture...")
-        try await stream.startCapture()
+        if needsDedicatedAudioStream {
+            async let audioTask: Void = startSystemAudioStream()
+            try await stream.startCapture()
+            _ = await audioTask
+        } else {
+            try await stream.startCapture()
+        }
         logger.info("Stream capture started successfully")
         isCapturing = true
-
-        if needsDedicatedAudioStream {
-            await startSystemAudioStream()
-        }
 
         logger.info("Capture started successfully")
     }
@@ -174,7 +176,7 @@ final class CaptureEngine: NSObject {
     /// Stops the current capture stream
     func stopCapture() async throws {
         await systemAudioStream.stop()
-        microphoneSession.stop()
+        await microphoneSession.stop()
 
         guard let runningStream = stream, isCapturing else { return }
 
@@ -246,6 +248,7 @@ final class CaptureEngine: NSObject {
         config.capturesAudio = capturesAudio
         config.sampleRate = 48000
         config.channelCount = 2
+        config.excludesCurrentProcessAudio = true
 
         return config
     }
@@ -285,7 +288,7 @@ extension CaptureEngine: SCStreamDelegate {
 
             self.isCapturing = false
             self.stream = nil
-            self.microphoneSession.stop()
+            await self.microphoneSession.stop()
             await self.systemAudioStream.stop()
             self.delegate?.captureEngine(self, didStopWithError: error)
             logger.error("Stream stopped with error: \(error.localizedDescription)")

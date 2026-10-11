@@ -273,8 +273,13 @@ final class RecorderViewModel: ObservableObject {
 
     /// Starts a new recording session
     func startRecording() async {
-        if selectedContentFilter == nil && ContentSelectionMode.current == .fullScreen {
-            await selectFullScreen()
+        if selectedContentFilter == nil {
+            if ContentSelectionMode.current == .fullScreen {
+                await selectFullScreen()
+            } else if ContentSelectionMode.current == .selectArea {
+                logger.info("No area selected yet; presenting area selection overlay")
+                await presentAreaSelection()
+            }
         }
 
         guard canStartRecording else {
@@ -408,6 +413,12 @@ final class RecorderViewModel: ObservableObject {
 
             settings.stopAccessingOutputDirectory()
 
+        } catch AssetWriterError.noFramesWritten {
+            state = .idle
+            recordingDuration = 0
+            assetWriter.cancel()
+            settings.stopAccessingOutputDirectory()
+            logger.info("Recording stopped before any frames were written; cancelled cleanly without failure notification")
         } catch {
             state = .idle
             lastError = error

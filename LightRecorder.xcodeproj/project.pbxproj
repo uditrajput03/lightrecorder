@@ -48,6 +48,7 @@
 		6CEFCF2D11BF8638D2955EFE /* RecorderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C83E22856373F37BBC9A793 /* RecorderViewModel.swift */; };
 		6CF11FBD6AED2945FFA04449 /* CaptureSizeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5481413CA39A7B2BA9E0A6 /* CaptureSizeCalculatorTests.swift */; };
 		6CFAB89E934995CA72A561BF /* PermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAC1A3C12DDAC4E19ACFFC7 /* PermissionService.swift */; };
+		6CAAA01B2E45678901234567 /* AudioLevelMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C99A01B2E45678901234567 /* AudioLevelMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +106,7 @@
 		6CF51D1ED622826D2BCCFFBA /* AssetWriterSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AssetWriterSettings.swift"; sourceTree = "<group>"; };
 		6CF59E0974449A6783A6BC0E /* ContentSelectionMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentSelectionMode.swift"; sourceTree = "<group>"; };
 		6CFCC78C3F70C3F261FBD735 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate.swift"; sourceTree = "<group>"; };
+		6C99A01B2E45678901234567 /* AudioLevelMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLevelMonitor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +148,7 @@
 				6C3307BE6C804FE8D29B6ADC /* AssetWriter.swift */,
 				6CD9195B482FD874E21BABD2 /* AssetWriterError.swift */,
 				6CF51D1ED622826D2BCCFFBA /* AssetWriterSettings.swift */,
+				6C99A01B2E45678901234567 /* AudioLevelMonitor.swift */,
 				6C04FAD5B95A991A18038F72 /* AudioDeviceService.swift */,
 				6C8617A041F55E572FF565E2 /* CaptureEngine.swift */,
 				6C4D55F27F05D85B8473358C /* CaptureSizeCalculator.swift */,
@@ -355,6 +358,7 @@
 				6C2133D8637F5D2B766AEDA8 /* AssetWriter.swift in Sources */,
 				6C2D58BE05C29364730C7FE5 /* AssetWriterError.swift in Sources */,
 				6CCD0EEB7B697EE1C21F02C9 /* AssetWriterSettings.swift in Sources */,
+				6CAAA01B2E45678901234567 /* AudioLevelMonitor.swift in Sources */,
 				6C591544DA688BD0088A3B61 /* AudioDeviceService.swift in Sources */,
 				6C23BD68693DFFBC270D284F /* CaptureEngine.swift in Sources */,
 				6C7FA7D15DE4499F283393BD /* CaptureSizeCalculator.swift in Sources */,

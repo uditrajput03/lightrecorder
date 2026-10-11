@@ -163,6 +163,7 @@ struct VideoSettingsView: View {
 struct AudioSettingsView: View {
     @ObservedObject var settings: SettingsStore
     @ObservedObject var audioDeviceService: AudioDeviceService
+    @StateObject private var audioMonitor = AudioLevelMonitor()
 
     var body: some View {
         Form {
@@ -186,6 +187,20 @@ struct AudioSettingsView: View {
                             }
                         }
                         .help("Select which microphone input to record")
+
+                        if audioMonitor.permissionDenied {
+                            HStack(spacing: 6) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.yellow)
+                                Text("Microphone permission required for level test")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.top, 2)
+                        } else {
+                            AudioLevelMeterView(level: audioMonitor.level, peak: audioMonitor.peak)
+                                .padding(.top, 4)
+                        }
                     }
                 }
             }
@@ -214,6 +229,78 @@ struct AudioSettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
+        .onAppear {
+            if settings.captureMicrophone {
+                audioMonitor.startMonitoring(deviceID: settings.selectedMicrophoneID)
+            }
+        }
+        .onDisappear {
+            audioMonitor.stopMonitoring()
+        }
+        .onChange(of: settings.captureMicrophone) { enabled in
+            if enabled {
+                audioMonitor.startMonitoring(deviceID: settings.selectedMicrophoneID)
+            } else {
+                audioMonitor.stopMonitoring()
+            }
+        }
+        .onChange(of: settings.selectedMicrophoneID) { newID in
+            audioMonitor.switchDevice(to: newID)
+        }
+    }
+}
+
+// MARK: - Pre-Flight Audio Level Meter View
+
+struct AudioLevelMeterView: View {
+    let level: Float
+    let peak: Float
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text("Input Level")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if level > 0.05 {
+                    Text("Speaking")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                }
+            }
+
+            GeometryReader { geometry in
+                let width = geometry.size.width
+                ZStack(alignment: .leading) {
+                    // Meter background track
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.secondary.opacity(0.18))
+                        .frame(height: 7)
+
+                    // Active signal gradient bar
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(
+                            LinearGradient(
+                                colors: [.green, .yellow, .orange, .red],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(0, width * CGFloat(level)), height: 7)
+                        .animation(.linear(duration: 0.04), value: level)
+
+                    // Peak hold tick mark
+                    if peak > 0.02 {
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(Color.primary.opacity(0.85))
+                            .frame(width: 2, height: 9)
+                            .offset(x: min(width - 2, width * CGFloat(peak)))
+                    }
+                }
+            }
+            .frame(height: 9)
+        }
     }
 }
 

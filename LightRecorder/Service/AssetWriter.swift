@@ -21,6 +21,8 @@ import os
 /// - Uses variable frame rate (VFR) timestamps; static screens produce no duplicate frames,
 ///   saving CPU, GPU, and disk space.
 /// - Anchors audio and video to a shared zero-origin without synthetic frame insertion.
+/// - Actively detects and fills audio discontinuities and startup latency with silence,
+///   preventing audio drift over long recordings and system sleep/wake/device switch events.
 final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable {
 
     // MARK: - Properties
@@ -49,8 +51,11 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
     /// Timestamp of the last video frame written, relative to `sessionAnchor`.
     private var lastVideoTime: CMTime = .invalid
 
-    /// Timestamp of the last audio sample written, relative to `sessionAnchor`.
-    private var lastAudioTime: CMTime = .invalid
+    /// Timestamp when the last written system audio buffer ends, relative to `sessionAnchor`.
+    private var lastSystemAudioEndTime: CMTime = .invalid
+
+    /// Timestamp when the last written microphone buffer ends, relative to `sessionAnchor`.
+    private var lastMicrophoneEndTime: CMTime = .invalid
 
     /// Whether the head of each audio track has already been padded with silence.
     private var hasPaddedAudio = false
@@ -222,26 +227,18 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
         lock.withLockUnchecked {
             guard let assetWriter,
                 assetWriter.status == .writing,
-                let audioInput,
-                audioInput.isReadyForMoreMediaData
+                let audioInput
             else {
                 return
             }
 
-            let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            startSessionIfNeeded(at: pts)
-
-            if !hasPaddedAudio {
-                hasPaddedAudio = true
-                padWithSilence(sampleBuffer, into: audioInput, label: "system audio")
-            }
-
-            let rebasedPts = CMTimeSubtract(pts, sessionAnchor)
-            if rebasedPts > lastAudioTime {
-                lastAudioTime = rebasedPts
-            }
-
-            append(sampleBuffer, rebasedInto: audioInput, label: "audio")
+            processAndAppendAudio(
+                sampleBuffer,
+                into: audioInput,
+                label: "system audio",
+                hasPadded: &hasPaddedAudio,
+                lastEndTime: &lastSystemAudioEndTime
+            )
         }
     }
 
@@ -250,27 +247,165 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
         lock.withLockUnchecked {
             guard let assetWriter,
                 assetWriter.status == .writing,
-                let microphoneInput,
-                microphoneInput.isReadyForMoreMediaData
+                let microphoneInput
             else {
                 return
             }
 
-            let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            startSessionIfNeeded(at: pts)
-
-            if !hasPaddedMicrophone {
-                hasPaddedMicrophone = true
-                padWithSilence(sampleBuffer, into: microphoneInput, label: "microphone")
-            }
-
-            let rebasedPts = CMTimeSubtract(pts, sessionAnchor)
-            if rebasedPts > lastAudioTime {
-                lastAudioTime = rebasedPts
-            }
-
-            append(sampleBuffer, rebasedInto: microphoneInput, label: "microphone")
+            processAndAppendAudio(
+                sampleBuffer,
+                into: microphoneInput,
+                label: "microphone",
+                hasPadded: &hasPaddedMicrophone,
+                lastEndTime: &lastMicrophoneEndTime
+            )
         }
+    }
+
+    // MARK: - Audio Processing & Drift Prevention
+
+    /// Handles timestamps, padding, silence gap filling, rebasing, and writing of audio sample buffers.
+    private func processAndAppendAudio(
+        _ sampleBuffer: CMSampleBuffer,
+        into input: AVAssetWriterInput,
+        label: String,
+        hasPadded: inout Bool,
+        lastEndTime: inout CMTime
+    ) {
+        guard input.isReadyForMoreMediaData else {
+            logger.warning("\(label) input not ready for more media data; buffer dropped")
+            return
+        }
+
+        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        guard pts.isNumeric else { return }
+        let duration = sampleBufferDuration(sampleBuffer)
+
+        startSessionIfNeeded(at: pts)
+
+        guard let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) else {
+            logger.error("No format description in \(label) sample buffer")
+            return
+        }
+
+        if !hasPadded {
+            let offset = CMTimeSubtract(pts, sessionAnchor)
+            if offset < .zero {
+                let bufferEnd = CMTimeAdd(pts, duration)
+                if CMTimeSubtract(bufferEnd, sessionAnchor) <= .zero {
+                    // Entire buffer ended before session started; drop it
+                    return
+                }
+                // Buffer started before session anchor; skip it so subsequent buffer starts at/after anchor
+                return
+            }
+
+            hasPadded = true
+            if offset > CMTime(value: 1, timescale: 48000) {
+                let padded = padSilence(
+                    matching: formatDescription,
+                    duration: offset,
+                    at: .zero,
+                    into: input,
+                    label: label
+                )
+                lastEndTime = padded
+            } else {
+                lastEndTime = .zero
+            }
+        }
+
+        let rebasedPTS = CMTimeSubtract(pts, sessionAnchor)
+
+        // Mid-stream gap detection: if an audio gap exceeds 10ms (due to dropped buffers,
+        // device disconnect, or audio stream pause), fill with silence to keep audio in sync.
+        if lastEndTime.isNumeric && rebasedPTS > lastEndTime {
+            let gap = CMTimeSubtract(rebasedPTS, lastEndTime)
+            if gap > CMTime(value: 10, timescale: 1000) {
+                let padded = padSilence(
+                    matching: formatDescription,
+                    duration: gap,
+                    at: lastEndTime,
+                    into: input,
+                    label: label
+                )
+                lastEndTime = CMTimeAdd(lastEndTime, padded)
+            }
+        }
+
+        // Ensure non-decreasing timestamps to prevent AVAssetWriter crashes on slight jitter
+        let targetPTS = lastEndTime.isNumeric ? max(rebasedPTS, lastEndTime) : max(rebasedPTS, .zero)
+        guard let rebased = rebase(sampleBuffer, to: targetPTS) else {
+            logger.error("Failed to rebase \(label) sample buffer")
+            return
+        }
+
+        if input.append(rebased) {
+            lastEndTime = CMTimeAdd(targetPTS, duration)
+        } else {
+            logger.error("Failed to append \(label) sample buffer: \(self.assetWriter?.error?.localizedDescription ?? "unknown error")")
+        }
+    }
+
+    /// Writes silence covering gaps or startup deltas in chunks of up to 5 seconds to bound memory usage.
+    @discardableResult
+    private func padSilence(
+        matching formatDescription: CMFormatDescription,
+        duration: CMTime,
+        at startTime: CMTime,
+        into input: AVAssetWriterInput,
+        label: String
+    ) -> CMTime {
+        guard duration.isNumeric, duration > .zero else { return .zero }
+        let maxChunkSeconds = 5.0
+        var remaining = duration
+        var currentPTS = startTime
+        var totalPadded = CMTime.zero
+
+        while remaining.seconds > 0.0001 {
+            let chunkSec = min(remaining.seconds, maxChunkSeconds)
+            let chunkDuration = CMTime(seconds: chunkSec, preferredTimescale: 48000)
+            guard let silence = SilentAudioBuffer.make(
+                matching: formatDescription,
+                duration: chunkDuration,
+                at: currentPTS
+            ) else {
+                break
+            }
+
+            let actualDuration = sampleBufferDuration(silence)
+            let durationToAdvance = actualDuration > .zero ? actualDuration : chunkDuration
+
+            if input.append(silence) {
+                totalPadded = CMTimeAdd(totalPadded, durationToAdvance)
+                currentPTS = CMTimeAdd(currentPTS, durationToAdvance)
+                remaining = CMTimeSubtract(remaining, durationToAdvance)
+            } else {
+                logger.error("Failed to append silence chunk to \(label)")
+                break
+            }
+        }
+
+        if totalPadded > .zero {
+            logger.info("Padded \(label) with \(totalPadded.seconds * 1000, format: .fixed(precision: 1))ms of silence")
+        }
+        return totalPadded
+    }
+
+    /// Computes the exact duration of an audio sample buffer.
+    private func sampleBufferDuration(_ sampleBuffer: CMSampleBuffer) -> CMTime {
+        let duration = CMSampleBufferGetDuration(sampleBuffer)
+        if duration.isNumeric && duration > .zero {
+            return duration
+        }
+        let numSamples = CMSampleBufferGetNumSamples(sampleBuffer)
+        if let formatDesc = CMSampleBufferGetFormatDescription(sampleBuffer) {
+            let format = AVAudioFormat(cmAudioFormatDescription: formatDesc)
+            if format.sampleRate > 0 {
+                return CMTime(value: CMTimeValue(numSamples), timescale: CMTimeScale(format.sampleRate))
+            }
+        }
+        return .zero
     }
 
     // MARK: - Timing
@@ -288,54 +423,21 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
         logger.info("Session anchored at capture time: \(presentationTime.seconds)")
     }
 
-    /// Writes silence covering the gap between the session anchor and this track's
-    /// first sample, so the track begins at time zero.
-    private func padWithSilence(
-        _ sampleBuffer: CMSampleBuffer, into input: AVAssetWriterInput, label: String
-    ) {
-        let offset = CMSampleBufferGetPresentationTimeStamp(sampleBuffer) - sessionAnchor
-        guard offset.isNumeric, offset > .zero,
-            let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer),
-            let silence = SilentAudioBuffer.make(
-                matching: formatDescription, duration: offset, at: .zero)
-        else {
-            return
-        }
-
-        if input.append(silence) {
-            logger.info("Padded \(label) with \(offset.seconds * 1000, format: .fixed(precision: 1))ms of silence")
-        } else {
-            logger.error("Failed to pad \(label) with silence")
-        }
-    }
-
-    /// Rebases a sample buffer against the session anchor and appends it.
-    private func append(
-        _ sampleBuffer: CMSampleBuffer, rebasedInto input: AVAssetWriterInput, label: String
-    ) {
-        guard let rebased = rebase(sampleBuffer) else {
-            logger.error("Failed to rebase \(label) sample buffer")
-            return
-        }
-
-        if !input.append(rebased) {
-            logger.error("Failed to append \(label) sample buffer")
-        }
-    }
-
-    /// Returns a copy of `sampleBuffer` with its timestamps shifted so the session
-    /// anchor maps to zero.
-    private func rebase(_ sampleBuffer: CMSampleBuffer) -> CMSampleBuffer? {
+    /// Returns a copy of `sampleBuffer` with its timestamps shifted to `targetPTS`.
+    private func rebase(_ sampleBuffer: CMSampleBuffer, to targetPTS: CMTime) -> CMSampleBuffer? {
         guard var timings = try? sampleBuffer.sampleTimingInfos() else { return nil }
 
+        let originalPTS = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         for index in timings.indices {
-            let rebasedPTS = CMTimeSubtract(
-                timings[index].presentationTimeStamp, sessionAnchor)
-            timings[index].presentationTimeStamp = max(rebasedPTS, .zero)
+            let delta = originalPTS.isNumeric
+                ? CMTimeSubtract(timings[index].presentationTimeStamp, originalPTS)
+                : .zero
+            timings[index].presentationTimeStamp = max(CMTimeAdd(targetPTS, delta), .zero)
             if timings[index].decodeTimeStamp.isNumeric {
-                let rebasedDTS = CMTimeSubtract(
-                    timings[index].decodeTimeStamp, sessionAnchor)
-                timings[index].decodeTimeStamp = max(rebasedDTS, .zero)
+                let dtsDelta = originalPTS.isNumeric
+                    ? CMTimeSubtract(timings[index].decodeTimeStamp, originalPTS)
+                    : .zero
+                timings[index].decodeTimeStamp = max(CMTimeAdd(targetPTS, dtsDelta), .zero)
             }
         }
 
@@ -357,7 +459,8 @@ final class AssetWriter: CaptureEngineSampleBufferDelegate, @unchecked Sendable 
         hasStartedSession = false
         sessionAnchor = .invalid
         lastVideoTime = .invalid
-        lastAudioTime = .invalid
+        lastSystemAudioEndTime = .invalid
+        lastMicrophoneEndTime = .invalid
         hasLoggedFirstFrame = false
         hasPaddedAudio = false
         hasPaddedMicrophone = false

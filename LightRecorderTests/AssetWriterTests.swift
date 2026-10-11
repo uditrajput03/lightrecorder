@@ -259,6 +259,105 @@ final class AssetWriterTests: XCTestCase {
         }
     }
 
+    /// A mid-stream gap in audio (e.g. system sleep, audio device change, or dropped buffer)
+    /// must be padded with silence so the audio track stays in sync with video.
+    func testMidStreamAudioGapIsPaddedWithSilence() async throws {
+        let settings = makeStore()
+        settings.captureSystemAudio = true
+        settings.audioCodec = .pcm
+        settings.frameRate = .fps30
+
+        let assetWriter = AssetWriter()
+        try assetWriter.setup(url: makeOutputURL(), settings: settings, videoSize: videoSize)
+        try assetWriter.startWriting()
+
+        // Video runs from 0 to 800ms
+        assetWriter.appendVideoSample(try makeVideoSampleBuffer(at: .zero))
+        assetWriter.appendVideoSample(try makeVideoSampleBuffer(at: CMTime(value: 800, timescale: 1000)))
+
+        // Initial 3 audio buffers (approx 64ms)
+        for index in 0..<3 {
+            let pts = CMTime(value: CMTimeValue(index * 1024), timescale: 48000)
+            assetWriter.appendAudioSample(try makeSilentAudioSampleBuffer(at: pts))
+        }
+
+        // Gap of ~500ms before next audio sample
+        let gapStart = CMTime(value: 564, timescale: 1000)
+        for index in 0..<3 {
+            let offset = CMTime(value: CMTimeValue(index * 1024), timescale: 48000)
+            assetWriter.appendAudioSample(try makeSilentAudioSampleBuffer(at: gapStart + offset))
+        }
+
+        let result = try await assetWriter.finishWriting()
+        defer { try? FileManager.default.removeItem(at: result.url) }
+
+        let asset = AVURLAsset(url: result.url)
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        let audioTrack = try XCTUnwrap(audioTracks.first)
+        let timeRange = try await audioTrack.load(.timeRange)
+
+        // Without gap padding, 6 buffers is only ~128ms. With gap padding, duration is >= 600ms.
+        XCTAssertGreaterThan(timeRange.duration.seconds, 0.60)
+    }
+
+    /// Audio buffers captured before the video session anchor starts must not cause
+    /// duplicate zeros, negative timestamps, or writer errors.
+    func testAudioPriorToVideoAnchorIsDroppedSafely() async throws {
+        let settings = makeStore()
+        settings.captureSystemAudio = true
+
+        let assetWriter = AssetWriter()
+        try assetWriter.setup(url: makeOutputURL(), settings: settings, videoSize: videoSize)
+        try assetWriter.startWriting()
+
+        // Video establishes session anchor at 2.0s
+        let anchorTime = CMTime(value: 2000, timescale: 1000)
+        assetWriter.appendVideoSample(try makeVideoSampleBuffer(at: anchorTime))
+
+        // Audio arriving with timestamp before anchor (e.g. 1.5s)
+        let preAnchorTime = CMTime(value: 1500, timescale: 1000)
+        assetWriter.appendAudioSample(try makeSilentAudioSampleBuffer(at: preAnchorTime))
+
+        // Post-anchor audio
+        let postAnchorTime = CMTime(value: 2050, timescale: 1000)
+        assetWriter.appendAudioSample(try makeSilentAudioSampleBuffer(at: postAnchorTime))
+
+        let result = try await assetWriter.finishWriting()
+        defer { try? FileManager.default.removeItem(at: result.url) }
+
+        XCTAssertEqual(result.videoFrameCount, 1)
+        let asset = AVURLAsset(url: result.url)
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        let audioTrack = try XCTUnwrap(audioTracks.first)
+        let timeRange = try await audioTrack.load(.timeRange)
+        XCTAssertEqual(timeRange.start, .zero)
+    }
+
+    /// Audio packets with minor negative timestamp jitter from audio clocking are
+    /// clamped forward monotonically without crashing or failing the writer.
+    func testAudioJitterDoesNotFailWriter() async throws {
+        let settings = makeStore()
+        settings.captureSystemAudio = true
+
+        let assetWriter = AssetWriter()
+        try assetWriter.setup(url: makeOutputURL(), settings: settings, videoSize: videoSize)
+        try assetWriter.startWriting()
+
+        assetWriter.appendVideoSample(try makeVideoSampleBuffer(at: .zero))
+
+        // Audio buffers arriving with minor backward jitter
+        let timesInMilliseconds = [0, 21, 20, 42, 40, 64]
+        for ms in timesInMilliseconds {
+            let pts = CMTime(value: CMTimeValue(ms), timescale: 1000)
+            assetWriter.appendAudioSample(try makeSilentAudioSampleBuffer(at: pts))
+        }
+
+        let result = try await assetWriter.finishWriting()
+        defer { try? FileManager.default.removeItem(at: result.url) }
+
+        XCTAssertEqual(result.videoFrameCount, 1)
+    }
+
     // MARK: - Helpers
 
     private func isStrictlyIncreasing(_ times: [CMTime]) -> Bool {
