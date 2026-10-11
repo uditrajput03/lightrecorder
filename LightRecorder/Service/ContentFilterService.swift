@@ -90,7 +90,8 @@ final class ContentFilterService {
             combinedExcluded.append(window)
         }
 
-        logger.info("Applying content filter: excluding \(combinedExcluded.count) window(s) (wallpaper: \(visibility.showWallpaper), dock: \(visibility.showDock), lightRecorder: \(visibility.showLightRecorder))")
+        let filterSummary = "wallpaper: \(visibility.showWallpaper), dock: \(visibility.showDock), lightRecorder: \(visibility.showLightRecorder)"
+        logger.info("Applying content filter: excluding \(combinedExcluded.count) window(s) (\(filterSummary))")
 
         return SCContentFilter(display: targetDisplay, excludingWindows: combinedExcluded)
     }

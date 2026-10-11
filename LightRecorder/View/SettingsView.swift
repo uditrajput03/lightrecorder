@@ -95,6 +95,11 @@ struct VideoSettingsView: View {
         """
     }
 
+    private var fragmentedRecordingHelpText: String {
+        "Writes periodic movie fragments so the recording survives unexpected app termination or power loss. " +
+        "May reduce compatibility with certain video editors."
+    }
+
     var body: some View {
         Form {
             Section("Recording") {
@@ -137,7 +142,7 @@ struct VideoSettingsView: View {
                     .help(captureNativeResHelpText)
 
                 Toggle("Crash-Resilient Recording (Fragmented MP4)", isOn: $settings.crashResilientRecording)
-                    .help("Writes periodic movie fragments so the recording survives unexpected app termination or power loss. May reduce compatibility with certain video editors.")
+                    .help(fragmentedRecordingHelpText)
             }
 
             Section("Display Elements") {
