@@ -94,33 +94,6 @@ h1 {
   line-height: 1.6;
 }
 
-.install-box {
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px 16px;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 36px;
-}
-
-.copy-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.copy-btn:hover {
-  color: var(--text);
-}
-
 .actions {
   display: flex;
   gap: 16px;
@@ -227,6 +200,11 @@ code {
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+code:hover {
+  border-color: var(--border-hover);
 }
 
 footer {

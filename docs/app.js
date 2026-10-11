@@ -19,11 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Copy buttons
+  // Copy code blocks
   const toast = document.getElementById('toast');
-  document.querySelectorAll('[data-copy]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const text = btn.getAttribute('data-copy');
+  document.querySelectorAll('code').forEach((el) => {
+    el.title = 'Click to copy';
+    el.addEventListener('click', async () => {
+      const text = el.textContent.trim();
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
