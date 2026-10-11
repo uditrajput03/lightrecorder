@@ -11,7 +11,15 @@ import Foundation
 /// Video codec options for recording
 enum VideoCodec: String, CaseIterable, Identifiable {
     case h264 = "H.264"
-    case hevc = "H.265"
+    case hevc = "HEVC"
+
+    init?(rawValue: String) {
+        switch rawValue {
+        case "H.264": self = .h264
+        case "HEVC", "H.265": self = .hevc
+        default: return nil
+        }
+    }
 
     var id: String { rawValue }
 

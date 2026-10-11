@@ -21,7 +21,12 @@ final class VideoCodecTests: XCTestCase {
 
     func testRawValues() {
         XCTAssertEqual(VideoCodec.h264.rawValue, "H.264")
-        XCTAssertEqual(VideoCodec.hevc.rawValue, "H.265")
+        XCTAssertEqual(VideoCodec.hevc.rawValue, "HEVC")
+    }
+
+    func testLegacyRawValueMigration() {
+        XCTAssertEqual(VideoCodec(rawValue: "H.265"), .hevc)
+        XCTAssertEqual(VideoCodec(rawValue: "HEVC"), .hevc)
     }
 
     func testIdentifiable() {

@@ -186,6 +186,22 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(store.videoQuality, .low)
     }
 
+    func testVideoCodecPersists() {
+        let store = makeStore()
+        store.videoCodec = .h264
+        XCTAssertEqual(store.videoCodec, .h264)
+        store.videoCodec = .hevc
+        XCTAssertEqual(store.videoCodec, .hevc)
+    }
+
+    func testLegacyH265DefaultsLoadsAsHEVC() {
+        let suiteName = "com.lightrecorder.LightRecorderTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.set("H.265", forKey: "videoCodec")
+        let store = SettingsStore(defaults: defaults)
+        XCTAssertEqual(store.videoCodec, .hevc)
+    }
+
     func testBooleanSettingsPersist() {
         let store = makeStore()
 
