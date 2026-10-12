@@ -26,34 +26,25 @@ struct CountdownView: View {
     @ObservedObject var state: CountdownState
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    Circle()
-                        .strokeBorder(Color.white.opacity(0.2), lineWidth: 1.5)
-                )
-                .shadow(color: .black.opacity(0.35), radius: 12, x: 0, y: 4)
+        VStack(spacing: 6) {
+            Text("\(state.remaining)")
+                .font(.system(size: 84, weight: .semibold, design: .default))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.65), radius: 10, x: 0, y: 3)
+                .shadow(color: .black.opacity(0.4), radius: 2, x: 0, y: 1)
+                .contentTransition(.numericText())
+                .animation(.spring(response: 0.35, dampingFraction: 0.7), value: state.remaining)
 
-            VStack(spacing: 4) {
-                Text("\(state.remaining)")
-                    .font(.system(size: 60, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .contentTransition(.numericText())
-                    .animation(.spring(response: 0.35, dampingFraction: 0.65), value: state.remaining)
-
-                Button(action: state.onCancel) {
-                    Text("Cancel")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.75))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.white.opacity(0.1), in: Capsule())
-                }
-                .buttonStyle(.plain)
+            Button(action: state.onCancel) {
+                Text("esc to cancel")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .shadow(color: .black.opacity(0.7), radius: 4, x: 0, y: 1)
             }
+            .buttonStyle(.plain)
         }
-        .frame(width: 140, height: 140)
+        .frame(width: 160, height: 140)
     }
 }
 
@@ -116,7 +107,8 @@ final class CountdownOverlay {
 
         guard seconds > 0 else { return true }
 
-        let hudSize: CGFloat = 140
+        let hudWidth: CGFloat = 160
+        let hudHeight: CGFloat = 140
         let centerPoint: CGPoint
         if rect.width > 50 && rect.height > 50 {
             centerPoint = CGPoint(x: rect.midX, y: rect.midY)
@@ -125,10 +117,10 @@ final class CountdownOverlay {
         }
 
         let hudRect = NSRect(
-            x: centerPoint.x - hudSize / 2,
-            y: centerPoint.y - hudSize / 2,
-            width: hudSize,
-            height: hudSize
+            x: centerPoint.x - hudWidth / 2,
+            y: centerPoint.y - hudHeight / 2,
+            width: hudWidth,
+            height: hudHeight
         )
 
         let panel = CountdownPanel(contentRect: hudRect)
