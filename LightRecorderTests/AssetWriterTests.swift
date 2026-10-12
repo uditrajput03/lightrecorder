@@ -381,6 +381,31 @@ final class AssetWriterTests: XCTestCase {
         XCTAssertEqual(colorProps?[AVVideoYCbCrMatrixKey], AVVideoYCbCrMatrix_ITU_R_709_2)
     }
 
+    /// Audio buffers created without a pre-existing timing info array (common from audio units)
+    /// must be safely rebased with synthesized timing rather than producing NaN PTS or failing.
+    func testAudioWithEmptyTimingArrayIsRebasedAndAppended() async throws {
+        let settings = makeStore()
+        settings.captureSystemAudio = true
+
+        let assetWriter = AssetWriter()
+        try assetWriter.setup(url: makeOutputURL(), settings: settings, videoSize: videoSize)
+        try assetWriter.startWriting()
+
+        assetWriter.appendVideoSample(try makeVideoSampleBuffer(at: .zero))
+
+        // Buffer without pre-populated timing array
+        let buffer = try makeSilentAudioSampleBufferWithEmptyTiming(at: .zero)
+        assetWriter.appendAudioSample(buffer)
+
+        let result = try await assetWriter.finishWriting()
+        defer { try? FileManager.default.removeItem(at: result.url) }
+
+        XCTAssertEqual(result.videoFrameCount, 1)
+        let asset = AVURLAsset(url: result.url)
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        XCTAssertEqual(audioTracks.count, 1)
+    }
+
     // MARK: - Helpers
 
     private func isStrictlyIncreasing(_ times: [CMTime]) -> Bool {
@@ -468,6 +493,61 @@ final class AssetWriterTests: XCTestCase {
             bufferList: pcmBuffer.mutableAudioBufferList
         )
         XCTAssertEqual(attachStatus, noErr)
+
+        return buffer
+    }
+
+    /// Creates a buffer of silent audio without pre-populating sample timing infos.
+    private func makeSilentAudioSampleBufferWithEmptyTiming(at presentationTime: CMTime) throws -> CMSampleBuffer {
+        let frameCount: AVAudioFrameCount = 1024
+
+        let format = try XCTUnwrap(
+            AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 48000, channels: 2, interleaved: true)
+        )
+        let byteCount = Int(frameCount) * 4
+
+        var blockBuffer: CMBlockBuffer?
+        let blockStatus = CMBlockBufferCreateWithMemoryBlock(
+            allocator: kCFAllocatorDefault,
+            memoryBlock: nil,
+            blockLength: byteCount,
+            blockAllocator: kCFAllocatorDefault,
+            customBlockSource: nil,
+            offsetToData: 0,
+            dataLength: byteCount,
+            flags: 0,
+            blockBufferOut: &blockBuffer
+        )
+        XCTAssertEqual(blockStatus, noErr)
+        let block = try XCTUnwrap(blockBuffer)
+
+        let fillStatus = CMBlockBufferFillDataBytes(
+            with: 0,
+            blockBuffer: block,
+            offsetIntoDestination: 0,
+            dataLength: byteCount
+        )
+        XCTAssertEqual(fillStatus, noErr)
+
+        var sampleBuffer: CMSampleBuffer?
+        let createStatus = CMSampleBufferCreate(
+            allocator: kCFAllocatorDefault,
+            dataBuffer: block,
+            dataReady: true,
+            makeDataReadyCallback: nil,
+            refcon: nil,
+            formatDescription: format.formatDescription,
+            sampleCount: CMItemCount(frameCount),
+            sampleTimingEntryCount: 0,
+            sampleTimingArray: nil,
+            sampleSizeEntryCount: 0,
+            sampleSizeArray: nil,
+            sampleBufferOut: &sampleBuffer
+        )
+        XCTAssertEqual(createStatus, noErr)
+
+        let buffer = try XCTUnwrap(sampleBuffer)
+        CMSampleBufferSetOutputPresentationTimeStamp(buffer, newValue: presentationTime)
 
         return buffer
     }

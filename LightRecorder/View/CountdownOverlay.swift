@@ -96,6 +96,7 @@ final class CountdownOverlay {
 
     private var panel: CountdownPanel?
     private var isCancelled = false
+    private var activeCountdownTask: Task<Void, Error>?
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "LightRecorder",
         category: "CountdownOverlay"
@@ -154,6 +155,8 @@ final class CountdownOverlay {
         }
 
         defer {
+            activeCountdownTask?.cancel()
+            activeCountdownTask = nil
             if let eventMonitor {
                 NSEvent.removeMonitor(eventMonitor)
             }
@@ -169,7 +172,12 @@ final class CountdownOverlay {
             }
             countdownState.remaining = current
             do {
-                try await Task.sleep(nanoseconds: 1_000_000_000)
+                let sleepTask = Task {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                }
+                activeCountdownTask = sleepTask
+                try await sleepTask.value
+                activeCountdownTask = nil
             } catch {
                 return false
             }
@@ -186,6 +194,8 @@ final class CountdownOverlay {
     /// Cancels any active countdown
     func cancel() {
         isCancelled = true
+        activeCountdownTask?.cancel()
+        activeCountdownTask = nil
         dismiss()
     }
 

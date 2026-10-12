@@ -33,7 +33,9 @@ enum AssetWriterSettings {
         // Add compression properties for H.264 and HEVC to control bitrate.
         let bpp = settings.videoQuality.bitsPerPixel(for: settings.videoCodec)
         let frameRate = settings.frameRate.effectiveFrameRate
-        let bitrate = Int(size.width * size.height * bpp * frameRate)
+        let calculatedBitrate = Int(size.width * size.height * bpp * frameRate)
+        // Clamp bitrate to realistic bounds: minimum 1 Mbps, maximum 200 Mbps (prevents encoder rejection on 5K/6K displays)
+        let bitrate = max(1_000_000, min(calculatedBitrate, 200_000_000))
 
         let compressionProperties: [String: Any] = [
             AVVideoAverageBitRateKey: bitrate,
