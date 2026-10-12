@@ -146,6 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         case "open-recordings":
             let settings = viewModel.settings
+            settings.ensureOutputDirectoryExists()
             let didStart = settings.startAccessingOutputDirectory()
             defer {
                 if didStart {

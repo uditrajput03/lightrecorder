@@ -314,4 +314,24 @@ final class SettingsStoreTests: XCTestCase {
         store.countdownDuration = .seconds5
         XCTAssertEqual(changeCount, 1)
     }
+
+    func testEnsureOutputDirectoryExistsCreatesFolder() throws {
+        let store = makeStore()
+        let uniqueSubdir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("LightRecorderTestDir-\(UUID().uuidString)")
+
+        try FileManager.default.createDirectory(at: uniqueSubdir, withIntermediateDirectories: true)
+        store.setCustomOutputDirectory(uniqueSubdir)
+
+        // Remove it from disk to simulate missing directory
+        try FileManager.default.removeItem(at: uniqueSubdir)
+        defer {
+            try? FileManager.default.removeItem(at: uniqueSubdir)
+        }
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: uniqueSubdir.path(percentEncoded: false)))
+        let created = store.ensureOutputDirectoryExists()
+        XCTAssertTrue(created)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: uniqueSubdir.path(percentEncoded: false)))
+    }
 }

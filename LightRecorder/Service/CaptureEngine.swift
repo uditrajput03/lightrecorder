@@ -128,17 +128,25 @@ final class CaptureEngine: NSObject {
 
         logger.info("Stream config - capturesAudio: \(settings.captureSystemAudio), captureMicrophone: \(settings.captureMicrophone)")
         logger.info("Starting stream capture...")
-        if needsDedicatedAudioStream {
-            async let audioTask: Void = startSystemAudioStream()
-            try await stream.startCapture()
-            _ = await audioTask
-        } else {
-            try await stream.startCapture()
+        do {
+            if needsDedicatedAudioStream {
+                async let audioTask: Void = startSystemAudioStream()
+                try await stream.startCapture()
+                _ = await audioTask
+            } else {
+                try await stream.startCapture()
+            }
+            logger.info("Stream capture started successfully")
+            isCapturing = true
+            logger.info("Capture started successfully")
+        } catch {
+            logger.error("Failed to start stream capture: \(error.localizedDescription)")
+            self.stream = nil
+            self.isCapturing = false
+            await systemAudioStream.stop()
+            await microphoneSession.stop()
+            throw error
         }
-        logger.info("Stream capture started successfully")
-        isCapturing = true
-
-        logger.info("Capture started successfully")
     }
 
     /// Ensures the permissions the requested capture needs are granted, prompting if they are not

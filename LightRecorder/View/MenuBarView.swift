@@ -232,6 +232,7 @@ struct MenuBarView: View {
     }
 
     private func openRecordingsFolder() {
+        settings.ensureOutputDirectoryExists()
         let didStart = settings.startAccessingOutputDirectory()
         defer {
             if didStart {

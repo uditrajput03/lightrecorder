@@ -504,6 +504,23 @@ final class SettingsStore: ObservableObject {
         outputDirectory.stopAccessingSecurityScopedResource()
     }
 
+    /// Ensures that the output directory exists on disk, creating it if necessary.
+    @discardableResult
+    func ensureOutputDirectoryExists() -> Bool {
+        let didStart = startAccessingOutputDirectory()
+        defer {
+            if didStart {
+                stopAccessingOutputDirectory()
+            }
+        }
+        do {
+            try FileManager.default.createDirectory(at: outputDirectory, withIntermediateDirectories: true)
+            return true
+        } catch {
+            return false
+        }
+    }
+
     // MARK: - Private Storage
 
     private var frameRateRaw: Int {

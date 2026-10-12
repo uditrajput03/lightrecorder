@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-black?logo=apple)](https://www.apple.com/macos/)
 [![Swift 5](https://img.shields.io/badge/Swift-5.8%2B-F05138?logo=swift&logoColor=white)](https://swift.org)
-[![Tests](https://img.shields.io/badge/tests-126%20passed-brightgreen)](#running-tests)
+[![Tests](https://img.shields.io/badge/tests-133%20passed-brightgreen)](#running-tests)
 
 **A blazing fast, private, native macOS menu bar screen and audio recorder.**  
 Built entirely with SwiftUI, ScreenCaptureKit, and AVFoundation. Zero telemetry, zero external audio drivers, and 100% offline.

@@ -361,6 +361,9 @@ final class RecorderViewModel: ObservableObject {
             lastError = error
             selectionBorderFrame.dismiss()
 
+            // Ensure any capture stream or microphone session is stopped
+            try? await captureEngine.stopCapture()
+
             // The writer may already be set up and holding an empty output file. Cancel it
             // before releasing the output directory, since that is where the file lives.
             assetWriter.cancel()

@@ -65,6 +65,8 @@ final class AreaSelectionOverlay {
     /// Presents the area selection overlay on all connected displays
     /// - Returns: The selected area result, or nil if cancelled
     func present() async -> AreaSelectionResult? {
+        dismiss()
+
         let screens = NSScreen.screens
         guard !screens.isEmpty else {
             logger.error("No screens available")
@@ -512,7 +514,7 @@ final class AreaSelectionView: NSView {
         container.layer?.shadowOffset = CGSize(width: 0, height: -2)
 
         let confirm = makeActionButton(
-            title: "Confirm ⏎",
+            title: "Confirm ↩",
             textColor: .systemGreen,
             action: #selector(confirmButtonClicked)
         )
