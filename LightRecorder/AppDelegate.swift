@@ -152,7 +152,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     settings.stopAccessingOutputDirectory()
                 }
             }
-            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: settings.outputDirectory.path)
+            NSWorkspace.shared.open(settings.outputDirectory)
         default:
             logger.warning("Unhandled URL host: \(url.host ?? "nil")")
         }

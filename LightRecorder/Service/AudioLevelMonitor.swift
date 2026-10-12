@@ -9,6 +9,7 @@ import Accelerate
 import AVFoundation
 import Combine
 import OSLog
+import os
 
 /// Service that monitors live microphone audio levels for pre-flight testing in Settings.
 ///
@@ -52,13 +53,7 @@ final class AudioLevelMonitor: ObservableObject {
 
     // MARK: - Initialization & Deinitialization
 
-    init() {
-        delegate.onLevels = { [weak self] rawRMS, rawPeak in
-            Task { @MainActor [weak self] in
-                self?.processIncomingLevels(rms: rawRMS, peak: rawPeak)
-            }
-        }
-    }
+    init() {}
 
     deinit {
         displayTimer?.invalidate()
@@ -231,6 +226,11 @@ final class AudioLevelMonitor: ObservableObject {
     }
 
     private func updateBallistics() {
+        let (incomingRMS, incomingPeak) = delegate.readAndResetLevels()
+        if incomingRMS > 0 || incomingPeak > 0 {
+            processIncomingLevels(rms: incomingRMS, peak: incomingPeak)
+        }
+
         // Smooth release decay
         currentLevel *= 0.92
         if currentLevel < 0.005 {
@@ -255,7 +255,15 @@ final class AudioLevelMonitor: ObservableObject {
 
 private final class AudioLevelSampleDelegate: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, @unchecked Sendable {
 
-    var onLevels: ((Float, Float) -> Void)?
+    private let levelsLock = OSAllocatedUnfairLock<(rms: Float, peak: Float)>(initialState: (0, 0))
+
+    func readAndResetLevels() -> (rms: Float, peak: Float) {
+        levelsLock.withLock { current in
+            let res = current
+            current = (0, 0)
+            return res
+        }
+    }
 
     func captureOutput(
         _ output: AVCaptureOutput,
@@ -345,6 +353,9 @@ private final class AudioLevelSampleDelegate: NSObject, AVCaptureAudioDataOutput
         let normalizedRMS = max(0.0, min(1.0, (rmsDB - minDB) / (-minDB)))
         let normalizedPeak = max(0.0, min(1.0, (peakDB - minDB) / (-minDB)))
 
-        onLevels?(normalizedRMS, normalizedPeak)
+        levelsLock.withLock { current in
+            current.rms = max(current.rms, normalizedRMS)
+            current.peak = max(current.peak, normalizedPeak)
+        }
     }
 }

@@ -289,4 +289,29 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(store.videoCodec, .hevc)
         XCTAssertEqual(store.audioCodec, .aac)
     }
+
+    // MARK: - Performance & Caching Tests
+
+    func testOutputDirectoryReturnsCachedInstance() {
+        let store = makeStore()
+        let tempDir = FileManager.default.temporaryDirectory
+        store.setCustomOutputDirectory(tempDir)
+
+        let first = store.outputDirectory
+        let second = store.outputDirectory
+        XCTAssertEqual(first, second)
+        XCTAssertTrue(store.hasCustomOutputDirectory)
+    }
+
+    func testCountdownDurationTriggersSingleObjectWillChange() {
+        let store = makeStore()
+        var changeCount = 0
+        let cancellable = store.objectWillChange.sink {
+            changeCount += 1
+        }
+        defer { cancellable.cancel() }
+
+        store.countdownDuration = .seconds5
+        XCTAssertEqual(changeCount, 1)
+    }
 }

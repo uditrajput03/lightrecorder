@@ -238,7 +238,7 @@ struct MenuBarView: View {
                 settings.stopAccessingOutputDirectory()
             }
         }
-        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: settings.outputDirectory.path)
+        NSWorkspace.shared.open(settings.outputDirectory)
     }
 
     private func openSettings() {

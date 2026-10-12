@@ -107,6 +107,8 @@ final class AreaSelectionOverlay {
         panels.removeAll()
         overlayViews.removeAll()
         NSCursor.arrow.set()
+        continuation?.resume(returning: nil)
+        continuation = nil
     }
 
     /// Clears the selection on all overlay views except the given one
@@ -125,16 +127,15 @@ extension AreaSelectionOverlay: AreaSelectionViewDelegate {
         logger.info("Area selected: \(rect.origin.x),\(rect.origin.y) \(rect.width)x\(rect.height)")
 
         let result = AreaSelectionResult(screenRect: rect, screen: screen)
-        dismiss()
-        continuation?.resume(returning: result)
+        let cont = continuation
         continuation = nil
+        dismiss()
+        cont?.resume(returning: result)
     }
 
     func areaSelectionViewDidCancel(_ view: AreaSelectionView) {
         logger.info("Area selection cancelled")
         dismiss()
-        continuation?.resume(returning: nil)
-        continuation = nil
     }
 
     func areaSelectionViewDidBeginDrawing(_ view: AreaSelectionView) {
